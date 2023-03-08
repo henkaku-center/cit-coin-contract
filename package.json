@@ -21,7 +21,7 @@
     "@types/node": "^18.14.6",
     "chai": "^4.3.7",
     "dotenv": "^16.0.3",
-    "ethers": "^6.0.8",
+    "ethers": "^5.7.2",
     "hardhat": "^2.13.0",
     "hardhat-gas-reporter": "^1.0.9",
     "solidity-coverage": "^0.8.2",
@@ -33,6 +33,8 @@
     "start": "npx hardhat node",
     "test": "npx hardhat test",
     "compile": "npx hardhat compile",
-    "flatten": "npx hardhat flatten contracts/LearnToEarn.flat.sol > contracts/LearnToEarn.flat.sol"
+    "flatten:citcoin": "npx hardhat flatten contracts/CitCoin.sol > contracts/CitCoin.flat.sol",
+    "flatten:learntoearn": "npx hardhat flatten contracts/LearnToEarn.flat.sol > contracts/LearnToEarn.flat.sol",
+    "flatten": "yarn flatten:citcoin && yarn flatten:learntoearn"
   }
 }
