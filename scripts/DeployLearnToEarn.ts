@@ -5,8 +5,8 @@ dotenv.config()
 async function main() {
   const contract = await ethers.getContractFactory('LearnToEarn')
   const token = await contract.deploy(
-    '0x0E4587481c947f0aad33143e8b55E06f118036ac',
-    '0x137ea0e26414eb73BB08e601E28072781962f810'
+    process.env.CIT_COIN_ADDRESS as string,
+    process.env.GNOSIS_OWNER as string,
   )
   await token.deployed()
 
