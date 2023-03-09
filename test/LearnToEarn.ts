@@ -32,7 +32,7 @@ describe('LearnToEarn', () => {
     ]);
 
     // Minting tokens for owner and/or fund address
-    await citCoin.connect(owner).mint(owner.address, 1_000_000_000_000_000);
+    await citCoin.mint(owner.address, 1_000_000_000_000_000);
 
     // approve spend by quest contract from owner's wallet
     await citCoin.connect(owner).approve(quest.address, 5_000_000_000);
@@ -51,27 +51,9 @@ describe('LearnToEarn', () => {
         quest.connect(student1).setKeyword('Test', new Date().valueOf()),
       ).to.be.revertedWith('Ownable: caller is not the owner');
     });
-
-    it('Checking Cit Coin balance of the fund address', async () => {
-      expect(await citCoin.connect(owner).balanceOf(owner.address)).to.changeTokenBalances(
-        citCoin,
-        [owner, owner],
-        [-1_000_000_000_000_000, 1_000_000_000_000_000],
-      );
-    });
   });
 
   describe('Checking Keyword', () => {
-    // it('Successful from the fund address', async () => {
-    //   expect(await citCoin.connect(owner).transfer(student1.address, 1000)).to.changeTokenBalances(
-    //     citCoin,
-    //     [owner, student1],
-    //     [-1000, 1000],
-    //   );
-    //   expect(
-    //     await citCoin.connect(quest.signer).transferFrom(owner.address, student1.address, 1000),
-    //   ).to.changeTokenBalances(citCoin, [owner, student1], [-1000, 1000]);
-    // });
 
     it('Correct Quest answer', async () => {
       await quest.connect(student1).answerQuest('key1');

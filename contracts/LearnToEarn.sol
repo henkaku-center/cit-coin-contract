@@ -53,7 +53,6 @@ contract LearnToEarn is Ownable {
     }
 
     function answerQuest(string memory _keyword) public {
-         require(citCoin.approve(address(this), 5_000_000_000), "Approval failed");
         require(
             keccak256(abi.encodePacked(_keyword)) == keccak256(abi.encodePacked(weeklyQuest.keyword)),
             "WRONG ANSWER"
@@ -67,6 +66,7 @@ contract LearnToEarn is Ownable {
         userAttributes[msg.sender].point += rewardPoint;
         userAttributes[msg.sender].answeredAt = block.timestamp;
         citCoin.transferFrom(fundAddress, msg.sender, 5_000_000);
+//        citCoin.transfer(msg.sender, 5_000_000);
         emit CheckedAnswer(msg.sender, userAttributes[msg.sender].answeredAt);
     }
 }
