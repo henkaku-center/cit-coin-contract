@@ -98,12 +98,12 @@ describe('LearnToEarn', () => {
     });
 
     it('Answering to the new quest', async () => {
-      await quest.connect(student1).answerQuest(0x8421);
-      await quest.connect(owner).setQuest(4, 0x4214);
-      await quest.connect(student1).answerQuest(0x4214);
-      await quest.connect(student2).answerQuest(0x4214);
-      expect(await citCoin.balanceOf(student1.address)).to.be.equal(2 * 4 * rewardPoints);
-      expect(await citCoin.balanceOf(student2.address)).to.be.equal(4 * rewardPoints);
+      await quest.connect(student1).answerQuest(0x8421);  // 4 points
+      await quest.connect(owner).setQuest(5, 0x42142);
+      await quest.connect(student1).answerQuest(0x42142); // 5 points
+      await quest.connect(student2).answerQuest(0x42142); // 5 points
+      expect(await citCoin.balanceOf(student1.address)).to.be.equal(9 * rewardPoints);  // 4 + 5 points
+      expect(await citCoin.balanceOf(student2.address)).to.be.equal(5 * rewardPoints);  // 5 points
     });
     it('Trying to answer by an outsider', async () => {
       await expect(quest.connect(otherPerson).answerQuest(0x8421)).to.be.revertedWith(
