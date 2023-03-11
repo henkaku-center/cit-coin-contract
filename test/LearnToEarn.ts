@@ -57,17 +57,33 @@ describe('LearnToEarn', () => {
 
   describe('Checking Keyword', () => {
 
-    it('Correct Quest answer', async () => {
+    it('4 out of 4', async () => {
       await quest.connect(student1).answerQuest(0x8421);
       expect(await citCoin.connect(student1).balanceOf(student1.address)).to.be.equal(4 * rewardPoints);
     });
 
-    it('Correct3 out of 4 answers', async () => {
+    it('3 out of 4', async () => {
       await quest.connect(student1).answerQuest(0x8422);
       expect(await citCoin.connect(student1).balanceOf(student1.address)).to.be.equal(3 * rewardPoints);
     });
 
 
+    it('2 out of 4', async () => {
+      await quest.connect(student1).answerQuest(0x2422);
+      expect(await citCoin.connect(student1).balanceOf(student1.address)).to.be.equal(2 * rewardPoints);
+    });
+
+
+    it('1 out of 4', async () => {
+      await quest.connect(student1).answerQuest(0x2211);
+      expect(await citCoin.connect(student1).balanceOf(student1.address)).to.be.equal(rewardPoints);
+    });
+
+
+    it('0 out of 4', async () => {
+      await quest.connect(student1).answerQuest(0x1248);
+      expect(await citCoin.connect(student1).balanceOf(student1.address)).to.be.equal(0);
+    });
 
     it('Already Answered', async () => {
       await quest.connect(student1).answerQuest(0x8421);
@@ -89,12 +105,10 @@ describe('LearnToEarn', () => {
       expect(await citCoin.balanceOf(student1.address)).to.be.equal(2 * 4 * rewardPoints);
       expect(await citCoin.balanceOf(student2.address)).to.be.equal(4 * rewardPoints);
     });
-
-    // it('Trying to answer by an outsider', async () => {
-    //   await expect(quest.connect(otherPerson).answerQuest(0x8421)).to.be.revertedWith(
-    //     'INVALID: RECEIVER IS NOT ALLOWED',
-    //   );
-    // });
-
+    it('Trying to answer by an outsider', async () => {
+      await expect(quest.connect(otherPerson).answerQuest(0x8421)).to.be.revertedWith(
+        'INVALID: RECEIVER IS NOT ALLOWED',
+      );
+    });
   });
 });

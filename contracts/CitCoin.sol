@@ -17,7 +17,7 @@ contract CitCoin is ERC20, Ownable {
 
     constructor() ERC20("CitCoin", "CIT") {
         // when initializing the ERC20, the initial value is locked
-//        _mint(msg.sender, 1000);
+        //        _mint(msg.sender, 1000);
     }
 
     //    function _mintMinerReward() internal {
