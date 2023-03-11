@@ -7,8 +7,18 @@ import "./CitCoin.sol";
 
 contract LearnToEarn is Ownable {
     struct Quest {
-        uint256 startedAt;
-        string keyword;
+        // We can store  32 answers with 4 options with uint128 answers
+        /**
+         * We can store 16 answers with 4 choices if we use uint128
+         * Example: Q1 has first correct and Q2 has second correct answer, we can represent it as
+         * Q1: A, Q2: B = 1000 0100 = 0x84
+         *
+         * This method will be more useful when we implement multiple correct options on multiple choices
+         * Eg: Q1: A,B = 1100 = 0xC represents the query has option A and option B as correct answers
+        **/
+        uint256 publishedDate;
+        uint8 totalQuestions;
+        uint128 answer;
     }
 
     struct Attributes {
@@ -48,25 +58,31 @@ contract LearnToEarn is Ownable {
         rewardPoint = _rewardPoint;
     }
 
-    function setKeyword(string memory _keyword, uint256 startedAt) public onlyOwner {
-        weeklyQuest = Quest(startedAt, _keyword);
+    function setQuest(uint8 totalQuestions, uint128 answers) public onlyOwner {
+        // uint128 cannot store answers for more than 32 questions
+        require(totalQuestions > 0 && totalQuestions < 32);
+        weeklyQuest = Quest(block.timestamp, totalQuestions, answers);
     }
 
-    function answerQuest(string memory _keyword) public {
-        require(
-            keccak256(abi.encodePacked(_keyword)) == keccak256(abi.encodePacked(weeklyQuest.keyword)),
-            "WRONG ANSWER"
-        );
+    function answerQuest(uint128 answer) public {
         // This checks whether new weeklyQuest is available or not since answered timestamp will be always less than new
         // weeklyQuest timestamp
         require(
-            userAttributes[msg.sender].answeredAt <= weeklyQuest.startedAt,
+            userAttributes[msg.sender].answeredAt <= weeklyQuest.publishedDate,
             "ALREADY ANSWERED"
         );
-        userAttributes[msg.sender].point += rewardPoint;
+        uint128 result = answer ^ weeklyQuest.answer;
+        uint8 correctAnswers = 0;
+        for (uint256 i = 0; i < weeklyQuest.totalQuestions; i++) {
+            if (result % 16 == 0) {
+                correctAnswers += 1;
+            }
+            result = result >> 4;
+        }
+        userAttributes[msg.sender].point += rewardPoint * correctAnswers;
         userAttributes[msg.sender].answeredAt = block.timestamp;
-        citCoin.transferFrom(fundAddress, msg.sender, 5_000_000);
-//        citCoin.transfer(msg.sender, 5_000_000);
+        citCoin.transferFrom(fundAddress, msg.sender, rewardPoint * correctAnswers);
+        //        citCoin.transfer(msg.sender, rewardPoint * correctAnswers);
         emit CheckedAnswer(msg.sender, userAttributes[msg.sender].answeredAt);
     }
 }
