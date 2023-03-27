@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "./CitCoin.sol";
+import '@openzeppelin/contracts/utils/Counters.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
+import './CitCoin.sol';
 
 contract LearnToEarn is Ownable {
     struct Quest {
@@ -15,7 +15,7 @@ contract LearnToEarn is Ownable {
          *
          * This method will be more useful when we implement multiple correct options on multiple choices
          * Eg: Q1: A,B = 1100 = 0xC represents the query has option A and option B as correct answers
-        **/
+         **/
         uint256 publishedDate;
         uint8 totalQuestions;
         uint128 answer;
@@ -28,19 +28,45 @@ contract LearnToEarn is Ownable {
 
     Counters.Counter private _tokenIds;
     uint public rewardPoint = 1_000_000_000;
+    mapping(address => bool) private students;
     address public fundAddress;
+    address public dev; // address for developers to run block-chain on backend to configure
+    address public admin; // address for admin
     CitCoin public citCoin;
     Quest private weeklyQuest;
+
     mapping(address => Attributes) public userAttributes;
 
     // Events
     event CheckedAnswer(address _by, uint256 at);
     event ClaimedToken(address _by, uint256 _amount);
 
-    constructor(address _citCoin, address _fundAddress){
+    constructor(address _citCoin, address _fundAddress) {
         fundAddress = _fundAddress;
         citCoin = CitCoin(_citCoin);
+    }
 
+    modifier onlyAdmin() {
+        require(
+            msg.sender == owner() ||
+            msg.sender == admin ||
+            msg.sender == dev, 'INVALID: YOU MUST BE AN ADMIN TO CONTINUE');
+        _;
+    }
+
+    modifier onlyStudent() {
+        require(students[msg.sender], 'INVALID: YOU MUST BE A STUDENT TO CONTINUE');
+        _;
+    }
+
+    // set address of the admin account
+    function setAdmin(address _newAdmin) public onlyOwner {
+        admin = _newAdmin;
+    }
+
+    // set address of the developer account
+    function setDev(address _newDev) public onlyOwner {
+        dev = _newDev;
     }
 
     // Set the address of the funding account
@@ -51,7 +77,7 @@ contract LearnToEarn is Ownable {
     function withdraw() public onlyOwner {
         uint256 _amount = citCoin.balanceOf(address(this));
         bool success = citCoin.transfer(fundAddress, _amount);
-        require(success, "TXN FAILED");
+        require(success, 'ERROR: TXN FAILED');
     }
 
     function setRewardPoint(uint256 _rewardPoint) public onlyOwner {
@@ -64,7 +90,7 @@ contract LearnToEarn is Ownable {
         weeklyQuest = Quest(block.timestamp, totalQuestions, answers);
     }
 
-    function answerQuest(uint128 answer) public returns (uint) {
+    function answerQuest(uint128 answer) public onlyStudent returns(uint256) {
         /**
          * Here we take XOR between the expected vs answered data
          * Example:
@@ -76,16 +102,13 @@ contract LearnToEarn is Ownable {
          *
          * Finally, We perform Bitwise shift  by 4 bits for each question and check if last 4 bits are 0000
          * since we have 4 options to check one by one
-        **/
-        require(
-            userAttributes[msg.sender].answeredAt <= weeklyQuest.publishedDate,
-            "ALREADY ANSWERED"
-        );
+         **/
+        require(userAttributes[msg.sender].answeredAt <= weeklyQuest.publishedDate, 'ERROR: ALREADY ANSWERED');
         uint128 result = answer ^ weeklyQuest.answer;
         // checking the difference between actual vs answered
         uint8 correctAnswers = 0;
         for (uint256 i = 0; i < weeklyQuest.totalQuestions; i++) {
-            if (result % 0x10 == 0) {// checking if the number in binary ends with 0000
+            if (result % 0x10 == 0) {
                 correctAnswers += 1;
                 // if the number in binary ends with 0000, it is the correct answer
             }
@@ -98,5 +121,15 @@ contract LearnToEarn is Ownable {
         // citCoin.transfer(msg.sender, rewards);
         emit CheckedAnswer(msg.sender, userAttributes[msg.sender].answeredAt);
         return correctAnswers;
+    }
+
+    function addStudents(address[] memory users) public onlyAdmin {
+        for (uint256 i = 0; i < users.length; i++) {
+            addStudent(users[i]);
+        }
+    }
+
+    function addStudent(address user) public onlyAdmin {
+        students[user] = true;
     }
 }

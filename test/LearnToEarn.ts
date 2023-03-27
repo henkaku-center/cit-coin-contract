@@ -33,6 +33,11 @@ describe('LearnToEarn', () => {
       quest.address,
     ]);
 
+    await quest.addStudents([
+      student1.address,
+      student2.address,
+    ])
+
     // Minting tokens for owner and/or fund address
     await citCoin.mint(owner.address, 1_000_000_000_000_000);
 
@@ -88,7 +93,7 @@ describe('LearnToEarn', () => {
     it('Already Answered', async () => {
       await quest.connect(student1).answerQuest(0x8421);
       await expect(quest.connect(student1).answerQuest(0x8421)).to.be.revertedWith(
-        'ALREADY ANSWERED',
+        'ERROR: ALREADY ANSWERED',
       );
     });
 
@@ -107,7 +112,7 @@ describe('LearnToEarn', () => {
     });
     it('Trying to answer by an outsider', async () => {
       await expect(quest.connect(otherPerson).answerQuest(0x8421)).to.be.revertedWith(
-        'INVALID: RECEIVER IS NOT ALLOWED',
+        'INVALID: YOU MUST BE A STUDENT TO CONTINUE',
       );
     });
   });
