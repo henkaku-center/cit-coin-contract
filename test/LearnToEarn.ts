@@ -33,10 +33,7 @@ describe('LearnToEarn', () => {
       quest.address,
     ]);
 
-    await quest.addStudents([
-      student1.address,
-      student2.address,
-    ])
+    await quest.addStudents([student1.address, student2.address]);
 
     // Minting tokens for owner and/or fund address
     await citCoin.mint(owner.address, 1_000_000_000_000_000);
@@ -54,36 +51,38 @@ describe('LearnToEarn', () => {
     });
 
     it('Error setting Keyword by other', async () => {
-      await expect(
-        quest.connect(student1).setQuest(4, 0x8421),
-      ).to.be.revertedWith('Ownable: caller is not the owner');
+      await expect(quest.connect(student1).setQuest(4, 0x8421)).to.be.revertedWith(
+        'Ownable: caller is not the owner',
+      );
     });
   });
 
   describe('Checking Keyword', () => {
-
     it('4 out of 4', async () => {
       await quest.connect(student1).answerQuest(0x8421);
-      expect(await citCoin.connect(student1).balanceOf(student1.address)).to.be.equal(4 * rewardPoints);
+      expect(await citCoin.connect(student1).balanceOf(student1.address)).to.be.equal(
+        4 * rewardPoints,
+      );
     });
 
     it('3 out of 4', async () => {
       await quest.connect(student1).answerQuest(0x8422);
-      expect(await citCoin.connect(student1).balanceOf(student1.address)).to.be.equal(3 * rewardPoints);
+      expect(await citCoin.connect(student1).balanceOf(student1.address)).to.be.equal(
+        3 * rewardPoints,
+      );
     });
-
 
     it('2 out of 4', async () => {
       await quest.connect(student1).answerQuest(0x2422);
-      expect(await citCoin.connect(student1).balanceOf(student1.address)).to.be.equal(2 * rewardPoints);
+      expect(await citCoin.connect(student1).balanceOf(student1.address)).to.be.equal(
+        2 * rewardPoints,
+      );
     });
-
 
     it('1 out of 4', async () => {
       await quest.connect(student1).answerQuest(0x2211);
       expect(await citCoin.connect(student1).balanceOf(student1.address)).to.be.equal(rewardPoints);
     });
-
 
     it('0 out of 4', async () => {
       await quest.connect(student1).answerQuest(0x1248);
@@ -103,15 +102,39 @@ describe('LearnToEarn', () => {
     });
 
     it('Answering to the new quest', async () => {
-      await quest.connect(student1).answerQuest(0x8421);  // 4 points
+      await quest.connect(student1).answerQuest(0x8421); // 4 points
       await quest.connect(owner).setQuest(5, 0x42142);
       await quest.connect(student1).answerQuest(0x42142); // 5 points
       await quest.connect(student2).answerQuest(0x42142); // 5 points
-      expect(await citCoin.balanceOf(student1.address)).to.be.equal(9 * rewardPoints);  // 4 + 5 points
-      expect(await citCoin.balanceOf(student2.address)).to.be.equal(5 * rewardPoints);  // 5 points
+      expect(await citCoin.balanceOf(student1.address)).to.be.equal(9 * rewardPoints); // 4 + 5 points
+      expect(await citCoin.balanceOf(student2.address)).to.be.equal(5 * rewardPoints); // 5 points
     });
+
     it('Trying to answer by an outsider', async () => {
       await expect(quest.connect(otherPerson).answerQuest(0x8421)).to.be.revertedWith(
+        'INVALID: YOU MUST BE A STUDENT TO CONTINUE',
+      );
+    });
+  });
+
+  describe('Managing Students', () => {
+    it('adding students', async () => {
+      expect(await quest.isStudent(otherPerson.address)).to.be.false;
+      await quest.addStudents([otherPerson.address]);
+      expect(await quest.isStudent(otherPerson.address)).to.be.true;
+    });
+
+    it('removing students', async () => {
+      expect(await quest.isStudent(student1.address)).to.be.true;
+      await quest.removeStudents([student1.address]);
+      expect(await quest.isStudent(student1.address)).to.be.false;
+    });
+
+    it('Answering questions by removed student', async () => {
+      expect(await quest.isStudent(student1.address)).to.be.true;
+      await quest.removeStudents([student1.address]);
+      expect(await quest.isStudent(student1.address)).to.be.false;
+      await expect(quest.connect(student1).answerQuest(0x8421)).to.be.revertedWith(
         'INVALID: YOU MUST BE A STUDENT TO CONTINUE',
       );
     });

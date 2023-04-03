@@ -37,12 +37,14 @@
     "flatten:learntoearn": "npx hardhat flatten contracts/LearnToEarn.sol > contracts/LearnToEarn.flat.sol",
     "flatten": "yarn flatten:citcoin && yarn flatten:learntoearn",
     "deploy:cit-coin-test": "npx hardhat run scripts/deployCitCoin.ts --network polygon_mumbai",
+    "deploy:cjpy-test": "npx hardhat run scripts/deployCJPY.ts --network polygon_mumbai",
     "deploy:learn-test": "npx hardhat run scripts/deployLearnToEarn.ts --network polygon_mumbai",
     "deploy:cit-coin": "npx hardhat run scripts/deployCitCoin.ts --network polygon",
+    "deploy:cjpy": "npx hardhat run scripts/deployCJPY.ts --network polygon",
     "deploy:learn": "npx hardhat run scripts/deployLearnToEarn.ts --network polygon",
-    "verify:cit-coin-test": "npx hardhat verify --network polygon --contract contracts/CitCoin.sol:CitCoin",
-    "verify:learn-test": "npx hardhat verify --network polygon_mumbai --contract contracts/LearnToEarn.sol:LearnToEarn",
     "verify:learn": "npx hardhat verify --network polygon --contract contracts/LearnToEarn.sol:LearnToEarn",
-    "verify:cit-coin": "npx hardhat verify --network polygon --contract contracts/CitCoin.sol:CitCoin"
+    "verify:cit-coin": "npx hardhat verify --network polygon --contract contracts/CitCoin.sol:CitCoin",
+    "verify:registry": "npx hardhat verify --network polygon --contract contracts/Registry.sol:Registry",
+    "verify:cjpy": "npx hardhat verify --network polygon --contract contracts/cJPY.sol:CJPY"
   }
 }

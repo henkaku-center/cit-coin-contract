@@ -90,7 +90,7 @@ contract LearnToEarn is Ownable {
         weeklyQuest = Quest(block.timestamp, totalQuestions, answers);
     }
 
-    function answerQuest(uint128 answer) public onlyStudent returns(uint256) {
+    function answerQuest(uint128 answer) public onlyStudent returns (uint256) {
         /**
          * Here we take XOR between the expected vs answered data
          * Example:
@@ -131,5 +131,19 @@ contract LearnToEarn is Ownable {
 
     function addStudent(address user) public onlyAdmin {
         students[user] = true;
+    }
+
+    function removeStudent(address user) public onlyAdmin {
+        students[user] = false;
+    }
+
+    function removeStudents(address[] memory users) public onlyAdmin {
+        for (uint256 i = 0; i < users.length; i++) {
+            removeStudent(users[i]);
+        }
+    }
+
+    function isStudent(address user) public view onlyAdmin returns(bool){
+        return students[user];
     }
 }
