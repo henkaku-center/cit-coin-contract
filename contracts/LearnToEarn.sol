@@ -31,7 +31,6 @@ contract LearnToEarn is Ownable {
   mapping(address => bool) private students;
   address public fundAddress;
   address public dev; // address for developers to run block-chain on backend to configure
-  address public admin; // address for admin
   CitCoin public citCoin;
   Quest private weeklyQuest;
   mapping(address => bool) public admins;
