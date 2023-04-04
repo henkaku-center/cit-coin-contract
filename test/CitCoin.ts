@@ -14,14 +14,14 @@ describe('Cit Coin', () => {
   beforeEach(async () => {
     ;[owner, alice, bob, funds] = await ethers.getSigners();
     const ERC20 = await ethers.getContractFactory('CitCoin');
-    erc20 = await ERC20.connect(owner).deploy();
+    erc20 = await ERC20.deploy();
     await erc20.deployed();
   });
 
   describe('Transfer', () => {
     it('Successful Transfer', async () => {
       await erc20.addWhitelistUsers([owner.address, alice.address, bob.address]);
-      await erc20.connect(owner).mint(alice.address, parseUnits('100', 18));
+      await erc20.mint(alice.address, parseUnits('100', 18));
 
       await expect(erc20.connect(alice).transfer(bob.address, 20)).to.changeTokenBalances(
         erc20,
@@ -32,7 +32,7 @@ describe('Cit Coin', () => {
 
     it('reverts if receiver is not allowed', async () => {
       await erc20.addWhitelistUsers([owner.address, alice.address]);
-      await erc20.connect(owner).mint(alice.address, parseUnits('100', 18));
+      await erc20.mint(alice.address, parseUnits('100', 18));
 
       await expect(erc20.connect(alice).transfer(bob.address, 20)).to.be.revertedWith(
         'INVALID: RECEIVER IS NOT ALLOWED',
@@ -42,7 +42,7 @@ describe('Cit Coin', () => {
     context('When Unlocked', () => {
       it('successfully transferred without allowed list', async () => {
         await erc20.unLock();
-        await erc20.connect(owner).mint(alice.address, parseUnits('100', 18));
+        await erc20.mint(alice.address, parseUnits('100', 18));
 
         await expect(erc20.connect(alice).transfer(bob.address, 20)).to.changeTokenBalances(
           erc20,
@@ -144,7 +144,7 @@ describe('Cit Coin', () => {
         bob.address,
         constants.AddressZero,
       ]);
-      await erc20.connect(owner).mint(alice.address, parseUnits('100', 18));
+      await erc20.mint(alice.address, parseUnits('100', 18));
     });
 
     it('Successful Burn', async () => {
