@@ -39,7 +39,7 @@ contract LearnToEarn is Ownable {
   mapping(address => Attributes) public userAttributes;
 
   // Events
-  event CheckedAnswer(address _by, uint256 at);
+  event CheckedAnswer(address indexed _by, uint256 at);
   event ClaimedToken(address _by, uint256 _amount);
 
   constructor(address _citCoin, address _fundAddress) {
