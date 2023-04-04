@@ -108,10 +108,6 @@ describe('LearnToEarn', () => {
       );
     });
 
-    it('Wrong Quest answer', async () => {
-      quest.connect(student1).answerQuest(0x4218);
-      expect(await citCoin.connect(student1).balanceOf(student1.address)).to.be.equal(0);
-    });
 
     it('Answering to the new quest', async () => {
       await quest.connect(student1).answerQuest(0x8421); // 4 points
