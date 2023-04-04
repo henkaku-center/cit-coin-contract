@@ -37,9 +37,6 @@ describe('LearnToEarn', () => {
       notAdmin.address,
     ]);
 
-    quest = await _QUEST.deploy(citCoin.address, owner.address);
-    await quest.deployed();
-    await quest.setRewardPoint(rewardPoints);
 
     await quest.addStudents([student1.address, student2.address]);
 
