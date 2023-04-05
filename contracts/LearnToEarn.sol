@@ -4,8 +4,10 @@ pragma solidity ^0.8.17;
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './CitCoin.sol';
+import "./Whitelistable.sol";
+import "./cJPY.sol";
 
-contract LearnToEarn is Ownable {
+contract LearnToEarn is Ownable, Whitelistable {
   struct Quest {
     // We can store  32 answers with 4 options with uint128 answers
     /**
@@ -28,10 +30,9 @@ contract LearnToEarn is Ownable {
 
   Counters.Counter private _tokenIds;
   uint public rewardPoint = 1_000_000_000;
-  mapping(address => bool) private students;
   address public fundAddress;
   address public dev; // address for developers to run block-chain on backend to configure
-  CitCoin public citCoin;
+  CJPY public cJpy;
   Quest private weeklyQuest;
   mapping(address => bool) public admins;
 
@@ -41,9 +42,9 @@ contract LearnToEarn is Ownable {
   event CheckedAnswer(address indexed _by, uint256 at);
   event ClaimedToken(address _by, uint256 _amount);
 
-  constructor(address _citCoin, address _fundAddress) {
+  constructor(IRegistry registry, CJPY _cJpy, address _fundAddress) Whitelistable(registry) {
     fundAddress = _fundAddress;
-    citCoin = CitCoin(_citCoin);
+    cJpy = _cJpy;
   }
 
   modifier onlyAdmin() {
@@ -58,7 +59,7 @@ contract LearnToEarn is Ownable {
   }
 
   modifier onlyStudent() {
-    require(students[msg.sender], 'INVALID: YOU MUST BE A STUDENT TO CONTINUE');
+    require(registry.isWhitelisted(msg.sender), 'INVALID: YOU MUST BE A STUDENT TO CONTINUE');
     _;
   }
 
@@ -87,8 +88,8 @@ contract LearnToEarn is Ownable {
   }
 
   function withdraw() public onlyOwner {
-    uint256 _amount = citCoin.balanceOf(address(this));
-    bool success = citCoin.transfer(fundAddress, _amount);
+    uint256 _amount = cJpy.balanceOf(address(this));
+    bool success = cJpy.transfer(fundAddress, _amount);
     require(success, 'ERROR: TXN FAILED');
   }
 
@@ -132,33 +133,29 @@ contract LearnToEarn is Ownable {
     uint256 rewards = rewardPoint * correctAnswers;
     userAttributes[msg.sender].point += rewards;
     userAttributes[msg.sender].answeredAt = block.timestamp;
-    citCoin.transferFrom(fundAddress, msg.sender, rewards);
+    cJpy.transferFrom(fundAddress, msg.sender, rewards);
     // citCoin.transfer(msg.sender, rewards);
     emit CheckedAnswer(msg.sender, userAttributes[msg.sender].answeredAt);
     return correctAnswers;
   }
 
   function addStudents(address[] memory users) public onlyAdmin {
-    for (uint256 i = 0; i < users.length; i++) {
-      addStudent(users[i]);
-    }
+    registry.bulkAddToWhitelist(users);
   }
 
   function addStudent(address user) public onlyAdmin {
-    students[user] = true;
+    registry.addToWhitelist(user);
   }
 
   function removeStudent(address user) public onlyAdmin {
-    students[user] = false;
+    registry.removeFromWhitelist(user);
   }
 
   function removeStudents(address[] memory users) public onlyAdmin {
-    for (uint256 i = 0; i < users.length; i++) {
-      removeStudent(users[i]);
-    }
+    registry.bulkRemoveFromWhitelist(users);
   }
 
   function isStudent(address user) public view onlyAdmin returns (bool) {
-    return students[user];
+    return registry.isWhitelisted(user);
   }
 }
