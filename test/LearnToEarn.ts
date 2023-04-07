@@ -1,4 +1,4 @@
-import {assert, expect} from 'chai';
+import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { Contract } from 'ethers';
@@ -30,7 +30,7 @@ describe('LearnToEarn', () => {
     await quest.setRewardPoint(rewardPoints);
 
     // grant admin role of registry to quest address
-    await registry.grantRoleAdmin(quest.address)
+    await registry.grantRoleAdmin(quest.address);
 
     // adding whitelisted users
     await registry.bulkAddToWhitelist([
@@ -113,7 +113,6 @@ describe('LearnToEarn', () => {
         'ERROR: ALREADY ANSWERED',
       );
     });
-
 
     it('Answering to the new quest', async () => {
       await quest.connect(student1).answerQuest(0x8421); // 4 points

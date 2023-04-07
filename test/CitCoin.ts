@@ -12,7 +12,7 @@ describe('Cit Coin', () => {
     erc20: Contract;
 
   beforeEach(async () => {
-    ;[owner, alice, bob, funds] = await ethers.getSigners();
+    [owner, alice, bob, funds] = await ethers.getSigners();
     const ERC20 = await ethers.getContractFactory('CitCoin');
     erc20 = await ERC20.deploy();
     await erc20.deployed();
@@ -159,7 +159,7 @@ describe('Cit Coin', () => {
       );
     });
 
-    it('Trying to burn somepne else\'s token (Reverts the execution)', async () => {
+    it("Trying to burn somepne else's token (Reverts the execution)", async () => {
       await expect(erc20.connect(alice).burn(owner.address, 20)).to.be.revertedWith(
         'INVALID: NOT YOUR ASSET',
       );

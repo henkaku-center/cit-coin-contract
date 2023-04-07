@@ -4,8 +4,8 @@ pragma solidity ^0.8.17;
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './CitCoin.sol';
-import "./Whitelistable.sol";
-import "./cJPY.sol";
+import './Whitelistable.sol';
+import './cJPY.sol';
 
 contract LearnToEarn is Ownable, Whitelistable {
   struct Quest {
