@@ -9,9 +9,8 @@ import './cJPY.sol';
 
 contract LearnToEarn is Ownable, Whitelistable {
   struct Quest {
-    // We can store  32 answers with 4 options with uint128 answers
     /**
-     * We can store 16 answers with 4 choices if we use uint128
+     * We can store 64 answers with 4 choices if we use uint256
      * Example: Q1 has first correct and Q2 has second correct answer, we can represent it as
      * Q1: A, Q2: B, Q3: B, Q4: C = 1000 0100 0100 0010 = 0x8442
      *
@@ -31,7 +30,7 @@ contract LearnToEarn is Ownable, Whitelistable {
   Counters.Counter private _tokenIds;
   uint public rewardPoint = 1_000_000_000;
   address public fundAddress;
-  address public dev; // address for developers to run block-chain on backend to configure
+//  address public dev; // address for developers to run block-chain on backend to configure
   CJPY public cJpy;
   Quest private weeklyQuest;
   mapping(address => bool) public admins;
@@ -40,7 +39,7 @@ contract LearnToEarn is Ownable, Whitelistable {
 
   // Events
   event CheckedAnswer(address indexed _by, uint256 at);
-  event ClaimedToken(address _by, uint256 _amount);
+//  event ClaimedToken(address _by, uint256 _amount);
 
   constructor(IRegistry registry, CJPY _cJpy, address _fundAddress) Whitelistable(registry) {
     fundAddress = _fundAddress;
@@ -50,9 +49,9 @@ contract LearnToEarn is Ownable, Whitelistable {
   modifier onlyAdmin() {
     require(
       msg.sender == owner() ||
-        // msg.sender == admin ||
-        admins[msg.sender] == true ||
-        msg.sender == dev,
+      // msg.sender == admin ||
+      admins[msg.sender] == true,
+//      msg.sender == dev,
       'INVALID: YOU MUST BE AN ADMIN TO CONTINUE'
     );
     _;
@@ -78,9 +77,9 @@ contract LearnToEarn is Ownable, Whitelistable {
   }
 
   // set address of the developer account
-  function setDev(address _newDev) public onlyOwner {
-    dev = _newDev;
-  }
+  // function setDev(address _newDev) public onlyOwner {
+  //   dev = _newDev;
+  // }
 
   // Set the address of the funding account
   function setFundAddress(address _fundAddress) public onlyOwner {
