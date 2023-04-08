@@ -6,7 +6,7 @@ async function main() {
   const contract = await ethers.getContractFactory('LearnToEarn')
   const token = await contract.deploy(
     process.env.REGISTRY_ADDRESS as string, // Please note the address of the registry when deploying cJPY and set it here
-    process.env.CIT_COIN_ADDRESS as string,
+    process.env.CJPY_ADDRESS as string,
     process.env.GNOSIS_OWNER as string,
   )
   await token.deployed()

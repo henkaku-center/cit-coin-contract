@@ -1,19 +1,19 @@
 import { ethers } from 'hardhat';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 async function main() {
-  const registry = await ethers.getContractFactory('Registry');
-  const reg_token = await registry.deploy();
-  await reg_token.deployed();
-  const registry_address = reg_token.address
-  console.log('Registry Address: ', registry_address);
+  // const registryFactory = await ethers.getContractFactory('Registry');
+  // const registry = await registryFactory.attach(process.env.REGISTRY_ADDRESS ?? '');
 
   const cJPY = await ethers.getContractFactory('CJPY');
-  const token = await cJPY.deploy(registry_address);
+  const token = await cJPY.deploy(process.env.REGISTRY_ADDRESS as string );
   await token.deployed();
 
   console.log('cJPY Address: ', token.address);
+
+
 }
 
 main().catch((error) => {
