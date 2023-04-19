@@ -13,18 +13,18 @@ contract Faucet is Ownable, Whitelistable {
    * contract `Whitelistable`.
    */
 
-  address public maticToken;
-  uint256 public offering = 1e18; // 1 MATIC
+  address payable public server;  // the server address
+  uint256 public offering = 2e16; // 0.02 MATIC
   bool public locked;  // helpful when we want to lock the faucet itself irrespective of the single address
   uint256 public lockDuration;  // lock duration in seconds
-  //  address fundAddress;
   mapping(address => uint256) public lockTime;
 
-  constructor(address _maticToken, IRegistry registry) Whitelistable registry {
-    maticToken = _maticToken;
-    //    fundAddress = _fundAddress;
+  event RequestedTokens(address indexed _requestor, uint256 _amount);
+
+  constructor(IRegistry registry, address payable _server) Whitelistable(registry) {
     locked = false;
     lockDuration = 1 weeks;
+    server = _server;
   }
 
   modifier onlyUnlocked() {
@@ -32,15 +32,21 @@ contract Faucet is Ownable, Whitelistable {
     _;
   }
 
-  event RequestedTokens(address indexed _requestor, uint256 _amount);
+  modifier onlyServer() {
+    require(
+      msg.sender == server ||
+      msg.sender == owner(),
+      'ERROR: Only server or owner can call this function');
+    _;
+  }
+
+  function setServer(address payable _server) public onlyOwner {
+    // the server address is the address of the server which will send tokens to the users
+    server = _server;
+  }
 
   function setOffering(uint _offering) public onlyOwner {
     offering = _offering;
-  }
-
-  function updateMaticToken(address _maticToken) public onlyOwner {
-    // if we want to update the matic token address
-    maticToken = _maticToken;
   }
 
   function updateLockDuration(uint256 _duration) public onlyOwner {
@@ -55,40 +61,27 @@ contract Faucet is Ownable, Whitelistable {
     locked = _status;
   }
 
-  function requestTokens(address payable _requestor) public payable {
+  function requestTokens(address payable _requestor) public payable onlyUnlocked onlyServer {
     /**
-      * @dev The `requestTokens` function transfers MATIC tokens to the user who is enrolled in the classroom.
+      * @dev The `requestTokens` function transfers MATIC tokens to the user who
+      * is enrolled in the classroom.
       * The user can request tokens only after the lock duration is over.
       * The lock duration is set to 1 week by default.
       * The user can request tokens only if the faucet is not locked.
-      * The faucet can be locked by the owner.
-      * The faucet can be unlocked by the owner.
+      * Addresses available in registry can get tokens from the faucet.
       **/
-    require(!locked, 'ERROR: Faucet is currently locked, please try again later');
+    require(registry.isWhitelisted(_requestor), 'INVALID: Receiver is not a student or admin');
     require(
-      block.timestamp > lockTime[msg.sender] + lockDuration,
-      'ERROR: You have to wait until the lock time is over'
+      block.timestamp > lockTime[_requestor] + lockDuration,
+      'ERROR: This address is locked, please wait until the lock duration is over'
     );
-
-    require(address(this).balance > offering, 'Not enough funds in the faucet. Please donate');
-    require(maticToken.balanceOf(address(this)) >= offering, 'ERROR: Faucet out of funds');
-    require(maticToken.transfer(msg.sender, offering), 'ERROR: Transfer failed');
-
-
-    //if the balance of this contract is greater than the requested amount, send funds
-    _requestor.transfer(amountAllowed);
-
-    lockTime[msg.sender] = block.timestamp;
-  }
-
-
-  function fundFaucet() public payable {
-    IERC20 maticToken = IERC20(maticToken);
-    require(maticToken.transferFrom(msg.sender, address(this), msg.value), 'Transfer failed');
+    require(server.balance > offering, 'ERROR: Not enough funds in the faucet.');
+    require(server.send(offering), 'ERROR: Unable to send tokens to the user.');
+    lockTime[_requestor] = block.timestamp;
+    emit RequestedTokens(_requestor, offering);
   }
 
   function getFaucetBalance() public view returns (uint) {
-    IERC20 maticToken = IERC20(maticToken);
-    return maticToken.balanceOf(address(this));
+    return server.balance;
   }
 }
