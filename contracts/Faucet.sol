@@ -73,10 +73,12 @@ contract Faucet is Ownable, Whitelistable {
     require(registry.isWhitelisted(_requestor), 'INVALID: Receiver is not a student or admin');
     require(
       block.timestamp > lockTime[_requestor] + lockDuration,
-      'ERROR: This address is locked, please wait until the lock duration is over'
+      'INVALID: Already received matic coins, please wait until the lock duration is over.'
     );
     require(server.balance > offering, 'ERROR: Not enough funds in the faucet.');
-    require(server.send(offering), 'ERROR: Unable to send tokens to the user.');
+//    require(server.transfer(offering), 'ERROR: Could not load tokens to the faucet.');
+//    require(_requestor.transfer(offering), 'ERROR: Unable to send tokens to the user.');
+//    require(_requestor.call{value: offering}(""), 'ERROR: Unable to send tokens to the user.');
     lockTime[_requestor] = block.timestamp;
     emit RequestedTokens(_requestor, offering);
   }
