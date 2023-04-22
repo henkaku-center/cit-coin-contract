@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { assert, expect } from 'chai';
 import { ethers } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { Contract } from 'ethers';
@@ -23,13 +23,52 @@ describe('Faucet', () => {
     // deploy the faucet contract.
     // set the registry address as well as the server address.
     const faucetFactory = await ethers.getContractFactory('Faucet');
-    faucet = await faucetFactory.deploy(registry.address, server.address);
+    faucet = await faucetFactory.connect(owner).deploy(registry.address, server.address);
     await faucet.deployed();
-
     await registry.addToWhitelist(student.address);
 
-    // await server.approve(faucet.address, 1);
+    await owner.sendTransaction({
+      to: faucet.address,
+      value: ethers.utils.parseEther('20'),
+    });
   });
+  describe('Fund Management', () => {
+    it('should receive funds', async () => {
+      let balance = await ethers.provider.getBalance(faucet.address);
+      // console.log('Current Balance: ', ethers.utils.formatEther(balance));
+      expect(await owner.sendTransaction({
+        to: faucet.address,
+        value: ethers.utils.parseEther('20'),
+      })).to.emit(faucet, 'ReceivedFunds');
+      expect(await ethers.provider.getBalance(faucet.address)).to.equal(balance.add(ethers.utils.parseEther('20')));
+    });
+
+    it('should not receive funds below 1 matic', async () => {
+      await expect(owner.sendTransaction({
+        to: faucet.address,
+        value: ethers.utils.parseEther('0.9'),
+      })).to.be.revertedWith('ERROR: Please send more than 1 MATIC to the faucet.');
+    });
+
+    it('should be able to withdraw funds by owner', async () => {
+      let faucetBalance = await ethers.provider.getBalance(faucet.address);
+      let ownerBalance = await ethers.provider.getBalance(owner.address);
+      await expect(faucet.connect(owner).withdrawFunds()).to.emit(faucet, 'FundsWithdrawn');
+      expect(await ethers.provider.getBalance(faucet.address)).to.equal(0);
+      // The approximate value is used because of the gas fees
+      expect(await ethers.provider.getBalance(owner.address)).to.approximately(
+        ownerBalance.add(faucetBalance), ethers.utils.parseEther('0.01'));
+    });
+
+    it('should not be able to withdraw funds if not owner', async () => {
+      let faucetBalance = await ethers.provider.getBalance(faucet.address);
+      await expect(faucet.connect(student).withdrawFunds()).to.be.revertedWith('Ownable: caller is not the owner');
+      // The balance should not change
+      expect(await ethers.provider.getBalance(faucet.address)).to.equal(faucetBalance);
+    });
+
+  });
+
   describe('Sending Funds', () => {
     it('Fund Transfer Successful', async () => {
       await expect(faucet.connect(server).requestTokens(student.address)).to.emit(faucet, 'RequestedTokens');
@@ -47,6 +86,12 @@ describe('Faucet', () => {
       await faucet.connect(server).requestTokens(student.address);
       await time.increase(60 * 60 * 24 * 2); // increase time by 2 days
       await expect(faucet.connect(server).requestTokens(student.address)).to.emit(faucet, 'RequestedTokens');
+    });
+
+    it('No funds in the faucet', async () => {
+      await faucet.connect(owner).withdrawFunds();
+      await expect(faucet.connect(server).requestTokens(student.address))
+        .to.be.reverted;
     });
 
     it('Fund Transfer Unsuccessful to unregistered student', async () => {
