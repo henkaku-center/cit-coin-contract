@@ -22,11 +22,12 @@ const config: HardhatUserConfig = {
     //   chainId: 1337,
     //   accounts: [process.env.PRIVATE_KEY as string],
     // },
-    // polygon: {
-    //   url: 'https://rpc-mainnet.maticvigil.com/',
-    //   accounts: [process.env.PRIVATE_KEY as string],
-    // },
-    //
+
+    polygon: {
+      url: 'https://rpc-mainnet.maticvigil.com/',
+      accounts: [process.env.PRIVATE_KEY as string],
+    },
+
     polygon_mumbai: {
       url: 'https://rpc-mumbai.maticvigil.com',
       accounts: [process.env.PRIVATE_KEY as string],

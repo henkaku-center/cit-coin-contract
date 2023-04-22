@@ -108,7 +108,7 @@ describe('Faucet', () => {
     it('No funds in the faucet', async () => {
       await faucet.connect(owner).withdrawFunds();
       await expect(faucet.connect(server).requestTokens(student.address))
-        .to.be.reverted;
+        .to.be.revertedWith('ERROR: Not enough funds in the faucet.');
     });
 
     it('Fund Transfer Unsuccessful to unregistered student', async () => {

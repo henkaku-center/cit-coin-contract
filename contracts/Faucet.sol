@@ -83,15 +83,15 @@ contract Faucet is Ownable, Whitelistable {
       block.timestamp > lockTime[_requestor] + lockDuration,
       'INVALID: Already received matic coins, please wait until the lock duration is over.'
     );
-    require(server.balance > offering, 'ERROR: Not enough funds in the faucet.');
+    require(address(this).balance > offering, 'ERROR: Not enough funds in the faucet.');
     _requestor.transfer(offering);
     lockTime[_requestor] = block.timestamp;
     emit RequestedTokens(_requestor, offering);
   }
 
-  function getFaucetBalance() public view returns (uint) {
-    return server.balance;
-  }
+//  function getBalance() public view returns (uint) {
+//    return address(this).balance;
+//  }
 
   function withdrawFunds() public onlyOwner {
     // the owner can withdraw the funds from the faucet
