@@ -60,6 +60,11 @@ describe('Faucet', () => {
         ownerBalance.add(faucetBalance), ethers.utils.parseEther('0.01'));
     });
 
+    it('should not be able to withdraw funds if the faucet has no funds', async () => {
+      await faucet.connect(owner).withdrawFunds();
+      await expect(faucet.connect(owner).withdrawFunds()).to.be.revertedWith('ERROR: No funds to withdraw.');
+    });
+
     it('should not be able to withdraw funds if not owner', async () => {
       let faucetBalance = await ethers.provider.getBalance(faucet.address);
       await expect(faucet.connect(student).withdrawFunds()).to.be.revertedWith('Ownable: caller is not the owner');
@@ -71,7 +76,10 @@ describe('Faucet', () => {
 
   describe('Sending Funds', () => {
     it('Fund Transfer Successful', async () => {
+      const studentBalance = await ethers.provider.getBalance(student.address);
       await expect(faucet.connect(server).requestTokens(student.address)).to.emit(faucet, 'RequestedTokens');
+      expect(await ethers.provider.getBalance(student.address)).to.equal(studentBalance.add(ethers.utils.parseEther('0.02')));
+
     });
 
     it('Sending Funds twice within the locked time', async () => {
@@ -84,8 +92,17 @@ describe('Faucet', () => {
     it('Updating the unlock time and requesting the funds', async () => {
       await faucet.updateLockDuration(60 * 60 * 24); // set lock duration to 1 day
       await faucet.connect(server).requestTokens(student.address);
+      const studentBalance = await ethers.provider.getBalance(student.address);
       await time.increase(60 * 60 * 24 * 2); // increase time by 2 days
       await expect(faucet.connect(server).requestTokens(student.address)).to.emit(faucet, 'RequestedTokens');
+      expect(await ethers.provider.getBalance(student.address)).to.equal(studentBalance.add(ethers.utils.parseEther('0.02')));
+    });
+
+    it('updating the offer amount', async () => {
+      const studentBalance = await ethers.provider.getBalance(student.address);
+      await faucet.setOffering(ethers.utils.parseEther('5'));
+      await expect(faucet.connect(server).requestTokens(student.address)).to.emit(faucet, 'RequestedTokens');
+      expect(await ethers.provider.getBalance(student.address)).to.equal(studentBalance.add(ethers.utils.parseEther('5')));
     });
 
     it('No funds in the faucet', async () => {
