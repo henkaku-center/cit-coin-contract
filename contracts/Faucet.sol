@@ -13,7 +13,7 @@ contract Faucet is Ownable, Whitelistable {
    * contract `Whitelistable`.
    */
 
-  address payable public server;  // the server address
+  address public operator;  // the operator address
   uint256 public offering = 2e16; // 0.02 MATIC
   bool public locked;  // helpful when we want to lock the faucet itself irrespective of the single address
   uint256 public lockDuration;  // lock duration in seconds
@@ -23,10 +23,10 @@ contract Faucet is Ownable, Whitelistable {
   event FundReceived(address sender, uint256 amount);
   event FundsWithdrawn(address receiver, uint256 amount);
 
-  constructor(IRegistry registry, address payable _server) Whitelistable(registry) {
+  constructor(IRegistry registry, address _operator) Whitelistable(registry) {
     locked = false;
     lockDuration = 1 weeks;
-    server = _server;
+    operator = _operator;
   }
 
   modifier onlyUnlocked() {
@@ -34,23 +34,27 @@ contract Faucet is Ownable, Whitelistable {
     _;
   }
 
-  modifier onlyServer() {
+  modifier onlyOperator() {
     require(
-      msg.sender == server ||
+      msg.sender == operator ||
       msg.sender == owner(),
-      'ERROR: Only server or owner can call this function');
+      'ERROR: Only operator or owner can call this function');
     _;
+  }
+
+  function deposit(uint256 amount) internal {
+    require(amount > 1e18, 'ERROR: Please send more than 1 MATIC to the faucet.');
+    emit FundReceived(msg.sender, amount);
   }
 
   receive() external payable {
     // fallback function
-    require(msg.value > 1e18, 'ERROR: Please send more than 1 MATIC to the faucet.');
-    emit FundReceived(msg.sender, msg.value);
+    deposit(msg.value);
   }
 
-  function setServer(address payable _server) public onlyOwner {
-    // the server address is the address of the server which will send tokens to the users
-    server = _server;
+  function setoperator(address payable _operator) public onlyOwner {
+    // the operator address is the address of the operator which will send tokens to the users
+    operator = _operator;
   }
 
   function setOffering(uint _offering) public onlyOwner {
@@ -69,7 +73,7 @@ contract Faucet is Ownable, Whitelistable {
     locked = _status;
   }
 
-  function requestTokens(address payable _requestor) public payable onlyUnlocked onlyServer {
+  function requestTokens(address payable _requestor) external onlyUnlocked onlyOperator {
     /**
       * @dev The `requestTokens` function transfers MATIC tokens to the user who
       * is enrolled in the classroom.
@@ -89,9 +93,9 @@ contract Faucet is Ownable, Whitelistable {
     emit RequestedTokens(_requestor, offering);
   }
 
-//  function getBalance() public view returns (uint) {
-//    return address(this).balance;
-//  }
+  //  function getBalance() public view returns (uint) {
+  //    return address(this).balance;
+  //  }
 
   function withdrawFunds() public onlyOwner {
     // the owner can withdraw the funds from the faucet
