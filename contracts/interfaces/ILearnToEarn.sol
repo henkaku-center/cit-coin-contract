@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-
+/**
+ * @title ILearnToEarn
+ * @author Sudip
+ * @notice This Interface can be used on the contract that has dependency with
+ * learn to earn contract such as CitReward NFT.
+ */
 interface ILearnToEarn {
-  /// @title ILearnToEarn
-  /// @notice This is the interface for the LearnToEarnContract.
-  /// This interface is can be used on the other contract that has dependency
-  /// with LearnToEarn contract.
-  /// @author ghimiresdp
-
   function setAdmin(address _user) external;
 
   function isAdmin() external returns (bool);
