@@ -8,6 +8,9 @@ pragma solidity ^0.8.17;
  * learn to earn contract such as CitReward NFT.
  */
 interface ILearnToEarn {
+
+  function userAttributes(address _address) external view returns (uint256, uint256);
+
   function setAdmin(address _user) external;
 
   function isAdmin() external returns (bool);
