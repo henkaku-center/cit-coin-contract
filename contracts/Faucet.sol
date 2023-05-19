@@ -44,7 +44,7 @@ contract Faucet is Ownable, Whitelistable, ReentrancyGuard {
     _;
   }
 
-  function deposit(uint256 amount) internal {
+  function deposit(uint256 amount) external payable {
     require(amount > 1e18, 'ERROR: Please send more than 1 MATIC to the faucet.');
     emit FundReceived(msg.sender, amount);
   }
