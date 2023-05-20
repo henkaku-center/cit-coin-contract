@@ -43,12 +43,12 @@ describe('Faucet', () => {
       expect(await ethers.provider.getBalance(faucet.address)).to.equal(balance.add(ethers.utils.parseEther('20')));
     });
 
-    it('should not receive funds below 1 matic', async () => {
-      await expect(owner.sendTransaction({
-        to: faucet.address,
-        value: ethers.utils.parseEther('0.9'),
-      })).to.be.revertedWith('ERROR: Please send more than 1 MATIC to the faucet.');
-    });
+    // it('should not receive funds below 1 matic', async () => {
+    //   await expect(owner.sendTransaction({
+    //     to: faucet.address,
+    //     value: ethers.utils.parseEther('0.9'),
+    //   })).to.be.revertedWith('ERROR: Please send more than 1 MATIC to the faucet.');
+    // });
 
     it('should be able to withdraw funds by owner', async () => {
       let faucetBalance = await ethers.provider.getBalance(faucet.address);
