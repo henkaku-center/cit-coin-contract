@@ -44,14 +44,10 @@ contract Faucet is Ownable, Whitelistable, ReentrancyGuard {
     _;
   }
 
-  function deposit(uint256 amount) internal {
-    require(amount > 1e18, 'ERROR: Please send more than 1 MATIC to the faucet.');
-    emit FundReceived(msg.sender, amount);
-  }
-
   receive() external payable {
     // fallback function
-    deposit(msg.value);
+    // require(msg.value >= 1e18, 'ERROR: Please send more than 1 MATIC to the faucet.');
+    emit FundReceived(msg.sender, msg.value);
   }
 
   function setoperator(address payable _operator) public onlyOwner {

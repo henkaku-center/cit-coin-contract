@@ -26,6 +26,7 @@ const config: HardhatUserConfig = {
     polygon: {
       url: 'https://rpc-mainnet.maticvigil.com/',
       accounts: [process.env.PRIVATE_KEY as string],
+      // allowUnlimitedContractSize: true,
     },
 
     polygon_mumbai: {
