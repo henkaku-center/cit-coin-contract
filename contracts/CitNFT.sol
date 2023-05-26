@@ -9,25 +9,23 @@ import './interfaces/IRegistry.sol';
 import './Whitelistable.sol';
 import './interfaces/ILearnToEarn.sol';
 
-contract CitReward is ERC721, Ownable, Whitelistable {
+contract CitNFT is ERC721, Ownable, Whitelistable {
   /**
-   * @dev The contract CitReward is an ERC-721 compliant NFT that is received by
-   * students who earns cJPY by answering questions from the LearnToEarn tests.
-   * The contract is a non-fungible token that is earned by students in exchange
-   * with the cJPY.
+   * @dev The contract CitNFT is an ERC-721 compliant NFT that is received in
+   * exchange for cJPY that is earned by students answering questions from the
+   * LearnToEarn tests. CitNFT
    */
 
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
   IERC20 public cJPY;
-  IRegistry public registry;
   ILearnToEarn public learnToEarn;
 
   uint256 public price;
-  string private _contractURL;
-  mapping(uint256 => string) public _tokenURLs;
+  string private _contractURI;
+  mapping(uint256 => string) public _tokenURIs;
 
-  event BoughtCitReward(address _owner, uint256 _tokenId);
+  event EarnedNFT(address _owner, uint256 _tokenId);
 
   modifier onlyNoneHolder(address _address) {
     require(balanceOf(_address) == 0, 'ERROR: User must not be a token holder to continue');
@@ -42,17 +40,24 @@ contract CitReward is ERC721, Ownable, Whitelistable {
     require(_exists(_tokenId), 'ERC721Metadata: NONEXISTENT TOKEN.');
     _;
   }
-
+/**
+ * @param _registry Address of the registry Contract
+ * @param _cJpy Address of cJpy Contract
+ * @param _learnToEarn Learn to Earn Contract
+ */
   constructor(
     IRegistry _registry,
     IERC20 _cJpy,
-    address _learnToEarn
-  ) ERC721('Cit Reward', 'cit-reward') Whitelistable(_registry) {
+    ILearnToEarn _learnToEarn
+  ) ERC721('Cit NFT', 'CNFT') Whitelistable(_registry) {
     cJPY = _cJpy;
     registry = _registry;
     learnToEarn = _learnToEarn;
   }
 
+/**
+ * Sets the price of the token that needs to be spent to earn the NFT.
+ */
   function setPrice(uint256 _price) public onlyOwner {
     require(_price >= 1e18, 'MUST BE GTE 1e18');
     price = _price;
@@ -80,14 +85,17 @@ contract CitReward is ERC721, Ownable, Whitelistable {
     _setTokenURI(tokenId, finalTokenUri);
   }
 
+  /// Internal method that sets the token uri
+  function _setTokenURI(uint256 tokenId, string memory _uri) internal virtual hasTokenId(tokenId){
+    _tokenURIs[tokenId] = _uri;
+  }
+
+
   function claimToken() public onlyHolder(msg.sender) {
-    (uint256 points,) = learnToEarn.userAttributes(msg.sender).amount;
-    // todo: confirm if the line below is needed.
-    // require(points > 0, 'ERROR: NO POINTS EARNED');
+    (uint256 points, uint256 answered_at) = learnToEarn.userAttributes(msg.sender);
     require(cJPY.balanceOf(address(this)) >= points, 'INSUFFICIENT FUND IN WALLET');
     bool success = cJPY.transfer(msg.sender, points);
     require(success, 'TX FAILED');
-    userAttribute[msg.sender].claimableToken = 0;
-    emit ClaimedToken(msg.sender, points);
+    emit EarnedNFT(msg.sender, points);
   }
 }

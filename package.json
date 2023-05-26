@@ -39,6 +39,7 @@
     "flatten:citcoin": "npx hardhat flatten contracts/CitCoin.sol > contracts/CitCoin.flat.sol",
     "flatten:learntoearn": "npx hardhat flatten contracts/LearnToEarn.sol > contracts/LearnToEarn.flat.sol",
     "flatten": "yarn flatten:citcoin && yarn flatten:learntoearn",
+    "deploy": "npx hardhat run scripts/deploy.ts --network polygon_mumbai",
     "deploy:cit-coin-test": "npx hardhat run scripts/deployCitCoin.ts --network polygon_mumbai",
     "deploy:registry-test": "npx hardhat run scripts/deployRegistry.ts --network polygon_mumbai",
     "deploy:cjpy-test": "npx hardhat run scripts/deployCJPY.ts --network polygon_mumbai",
