@@ -5,18 +5,18 @@ import { Contract } from 'ethers';
 
 dotenv.config();
 
-interface ContractOption {
+interface ContractConfig {
   name: string;
   ownable: boolean;
   args: string[];
   postDeploy?: Function;
 }
 
-const contractConfig: ContractOption[] = [
+const contractConfigs: ContractConfig[] = [
   {
     name: 'CitCoin',
     ownable: true,
-    args: [process.env.REGISTRY_ADDRESS as string, process.env.FUND_ADDRESS as string],
+    args: [],
   },
   {
     name: 'CitNFT',
@@ -25,8 +25,8 @@ const contractConfig: ContractOption[] = [
   },
   {
     name: 'CJPY',
-    ownable: true,
-    args: [process.env.REGISTRY_ADDRESS as string, process.env.FUND_ADDRESS as string],
+    ownable: false,
+    args: [process.env.REGISTRY_ADDRESS as string],
   },
   {
     name: 'Faucet',
@@ -36,19 +36,29 @@ const contractConfig: ContractOption[] = [
   {
     name: 'LearnToEarn',
     ownable: true,
-    args: [process.env.REGISTRY_ADDRESS as string, process.env.FUND_ADDRESS as string],
+    args: [
+      process.env.REGISTRY_ADDRESS as string,
+      process.env.CJPY_ADDRESS as string,
+      process.env.GNOSIS_OWNER as string,
+    ],
   },
   {
     name: 'Registry',
-    ownable: true,
-    args: [process.env.REGISTRY_ADDRESS as string, process.env.FUND_ADDRESS as string],
+    ownable: false,
+    args: [],
+    postDeploy: async (registry: Contract) => {
+      await registry.bulkAddToWhitelist([
+        process.env.GNOSIS_OWNER as string,
+        '0x0000000000000000000000000000000000000000',
+      ]);
+    },
   },
 ];
 
 async function main() {
   console.log(
-    `Please select one of the contracts below:\n\n${Object.keys(contractConfig)
-      .map((item, idx) => `${idx}. ${item}`)
+    `Please select one of the contracts below:\n\n${contractConfigs
+      .map((item, idx) => `${idx}. ${item.name}`)
       .join('\n')}`,
   );
 
@@ -57,33 +67,32 @@ async function main() {
     output: process.stdout,
   });
 
-  prompt.question(`\nEnter Contract Name [Eg: CitCoin}]:\t`, async (name: string) => {
+  prompt.question(`\nSelect The Contract to deploy [Eg: 1]:\t`, async (index: string) => {
+    console.log(index);
     // @ts-ignore
-    let contractSetting: ContractOption = contractConfig[name];
-    if (contractSetting === undefined) {
+    let config: ContractConfig = contractConfigs[parseInt(index)];
+
+    if (config === undefined) {
       console.log('No valid contracts selected !!\n');
       process.exit(1);
     }
 
-    const contractFactory = await ethers.getContractFactory(contractSetting.name);
-    console.log('Deploying Contract with the following arguments:');
+    const contractFactory = await ethers.getContractFactory(config.name);
+    console.log('Deploying Contract with the following configuration:');
+    console.log(config);
 
-    contractSetting.args.forEach((item, idx) => {
-      console.log(`- ${item}: ${process.env[item]}`);
-    });
-
-    const contract = await contractFactory.deploy(...contractSetting.args);
+    const contract = await contractFactory.deploy(...config.args);
 
     await contract.deployed();
+    console.log('='.repeat(70));
+    console.log('  Contract Address: ', contract.address);
+    console.log('='.repeat(70));
 
     // transfer ownership of the contract if the contract is ownable
-    if (contractSetting.ownable) {
+    if (config.ownable) {
       await contract.transferOwnership(process.env.GNOSIS_OWNER as string);
     }
-
-    console.log('Contract Address: ', contract.address);
-
-    await contract.transferOwnership(process.env.GNOSIS_OWNER as string);
+    await config.postDeploy?.(contract);
 
     prompt.close();
     process.exit(0);
