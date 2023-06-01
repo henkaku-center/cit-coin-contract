@@ -21,7 +21,11 @@ const contractConfigs: ContractConfig[] = [
   {
     name: 'CitNFT',
     ownable: true,
-    args: [process.env.REGISTRY_ADDRESS as string, process.env.FUND_ADDRESS as string],
+    args: [
+      process.env.REGISTRY_ADDRESS as string,
+      process.env.CJPY_ADDRESS as string,
+      process.env.LEARN_TO_EARN_ADDRESS as string,
+    ],
   },
   {
     name: 'CJPY',
