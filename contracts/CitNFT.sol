@@ -87,11 +87,19 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
     _setTokenURI(tokenId, finalTokenUri);
   }
 
-  function claimToken() public onlyHolder(msg.sender) {
+  function claimToken() public {
     (uint256 points,) = learnToEarn.userAttributes(msg.sender);
     require(cJPY.balanceOf(address(this)) >= points, 'INSUFFICIENT FUND IN WALLET');
     bool success = cJPY.transfer(msg.sender, points);
     require(success, 'TX FAILED');
     emit BoughtNFT(msg.sender, points);
+  }
+
+  function mintNFT(string memory tokenURI, address to) external returns (uint256){
+    (uint256 points,) = learnToEarn.userAttributes(msg.sender);
+    require(cJPY.balanceOf(to) >= points, 'INSUFFICIENT FUND IN WALLET');
+    uint256 tokenId = _mint(tokenURI, to);
+    emit BoughtNFT(msg.sender, points);
+    return tokenId;
   }
 }
