@@ -35,6 +35,7 @@
     "start": "npx hardhat node",
     "test": "npx hardhat test --grep LearnToEarn",
     "test:faucet": "npx hardhat test --grep Faucet",
+    "test:nft": "npx hardhat test --grep NFT",
     "compile": "npx hardhat compile",
     "flatten:citcoin": "npx hardhat flatten contracts/CitCoin.sol > contracts/CitCoin.flat.sol",
     "flatten:learntoearn": "npx hardhat flatten contracts/LearnToEarn.sol > contracts/LearnToEarn.flat.sol",
