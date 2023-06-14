@@ -91,6 +91,8 @@ describe('Cit NFT Tests', () => {
     it('Claiming NFT should make cJPY balance 0', async () => {
       await NFT.connect(satoshi).mint(NFTUri);
       expect(await cJPY.balanceOf(satoshi.address)).to.be.eq('0');
+      expect(await cJPY.balanceOf(owner.address)).to.be.eq(parseUnits('20000', 18));
+
     });
 
     it('Trying to claim NFT with lower allowances than Earned cJPY', async () => {
@@ -98,6 +100,7 @@ describe('Cit NFT Tests', () => {
       await expect(NFT.connect(satoshi).mint(NFTUri)).to.be.revertedWith(
         'CJPY: INSUFFICIENT ALLOWANCE TO PURCHASE NFT');
       expect(await cJPY.balanceOf(satoshi.address)).to.be.eq(parseUnits('20000', 18));
+      expect(await cJPY.balanceOf(owner.address)).to.be.eq(parseUnits('0', 18));
     });
 
     it('Non-whitelisted users should not be able to claim tokens', async () => {
