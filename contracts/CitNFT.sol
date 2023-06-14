@@ -19,24 +19,29 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
   IERC20 public cJPY;
-
   uint256 public price;   // amount of cJPY needed to mint an NFT
   string private _contractURI;
   mapping(address => uint256) public earnedTokens;  // mapping of user vs earned token
+  bool public locked;
 
   event BoughtNFT(address _owner, uint256 _tokenId);
 
   modifier onlyNoneHolder(address _address) {
-    require(balanceOf(_address) == 0, 'ERROR: User must not be a token holder to continue');
+    require(balanceOf(_address) == 0, 'ERROR: USER ALREADY HOLDS THIS NFT');
     _;
   }
   modifier onlyHolder(address _address) {
-    require(balanceOf(_address) != 0, 'ERROR: User must be a token holder to continue');
+    require(balanceOf(_address) != 0, 'ERROR:USER DOES NOT HOLD THIS NFT');
     _;
   }
 
   modifier hasTokenId(uint256 _tokenId) {
     require(_exists(_tokenId), 'ERC721Metadata: NONEXISTENT TOKEN.');
+    _;
+  }
+
+  modifier onlyUnlocked() {
+    require(!locked, 'ERROR: CONTRACT LOCKED');
     _;
   }
 
@@ -50,7 +55,14 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
     cJPY = _cJpy;
     registry = _registry;
     setPrice(1e22); // 10,000 CJPY
+    locked = false;
   }
+
+  function lock(bool _status) public onlyOwner {
+    // locks or unlocks the faucet
+    locked = _status;
+  }
+
 
   function setPrice(uint256 _price) public onlyOwner {
     /// Sets the price of the token that needs to be spent to earn the NFT.
@@ -66,7 +78,7 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
     _transfer(_from, _to, _tokenId);
   }
 
-  function _mint(string memory _tokenUri, address _to) internal onlyNoneHolder(msg.sender) returns (uint256) {
+  function _mint(string memory _tokenUri, address _to) internal onlyNoneHolder(msg.sender) onlyUnlocked returns (uint256) {
     uint256 userBalance = cJPY.balanceOf(_to);
     require(userBalance >= price, 'CJPY: INSUFFICIENT FUNDS TO PURCHASE NFT');
     _tokenIds.increment();
@@ -83,15 +95,15 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
     delete earnedTokens[_from];
   }
 
-  function updateNFT(uint256 tokenId, string memory finalTokenUri) public onlyOwner {
-    _setTokenURI(tokenId, finalTokenUri);
+  function update(uint256 tokenId, string memory _newTokenUri) public onlyOwner {
+    _setTokenURI(tokenId, _newTokenUri);
   }
 
-  function mintNFT(string memory tokenURI, address to) external onlyOwner returns (uint256){
+  function mintTo(string memory tokenURI, address to) external onlyOwner returns (uint256){
     return _mint(tokenURI, to);
   }
 
-  function claimNFT(string memory tokenUri) external returns (uint256) {
+  function mint(string memory tokenUri) external returns (uint256) {
     return _mint(tokenUri, msg.sender);
   }
 }

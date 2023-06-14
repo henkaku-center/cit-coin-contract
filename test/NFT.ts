@@ -72,9 +72,34 @@ describe('Cit NFT Tests', () => {
 
   describe('Claiming NFT', () => {
     it('Should Revert transaction with less than 10000 cJPY', async () => {
-      await expect(NFT.mintNFT(NFTUri, john.address)).to.be.revertedWith('CJPY: INSUFFICIENT FUNDS TO PURCHASE NFT');
+      await expect(NFT.mintTo(NFTUri, john.address)).to.be.revertedWith('CJPY: INSUFFICIENT FUNDS TO PURCHASE NFT');
     });
 
+    it('Should revert minting the locked contract', async () => {
+      await NFT.lock(true);
+      await expect(NFT.connect(jane).mint(NFTUri)).to.be.revertedWith('ERROR: CONTRACT LOCKED');
+    });
+
+    it('Should Successfully claim NFT', async () => {
+      expect(await NFT.connect(satoshi).mint(NFTUri)).to.emit('CitNFT', 'BoughtNFT');
+    });
+
+    it('Contract owner should successfully claim NFT for student', async () => {
+      expect(await NFT.mintTo(NFTUri, jane.address)).to.emit('CitNFT', 'BoughtNFT');
+    });
+
+    it('Contract should revert minting the token again', async () => {
+      await NFT.connect(satoshi).mint(NFTUri);
+      await expect(NFT.connect(satoshi).mint(NFTUri)).to.be.revertedWith('ERROR: USER ALREADY HOLDS THIS NFT');
+    });
+  });
+
+  describe('Updating NFT', () => {
+    it('Successfully Update an NFT URL', async () => {
+      await NFT.connect(satoshi).mint(NFTUri);
+      await NFT.update(1, `${NFTUri}1`);
+      expect(await NFT.tokenURI(1)).to.eq(`${NFTUri}1`);
+    });
   });
 
 });
