@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { Contract, constants } from 'ethers';
-import { formatEther, parseUnits } from 'ethers/lib/utils';
+import { Contract } from 'ethers';
+import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
 describe('Cit NFT Tests', () => {
@@ -24,7 +24,6 @@ describe('Cit NFT Tests', () => {
     const RegistryFactory = await ethers.getContractFactory('Registry');
     const cJpyFactory = await ethers.getContractFactory('CJPY');
     const nftFactory = await ethers.getContractFactory('CitNFT');
-    const learnToEarnFactory = await ethers.getContractFactory('LearnToEarn');
 
     registry = await RegistryFactory.deploy();
     await registry.deployed();
@@ -52,6 +51,11 @@ describe('Cit NFT Tests', () => {
     //
     await NFT.setPrice(parseUnits('10000', 18));
 
+    await cJPY.connect(john).approve(NFT.address, parseUnits('8000', 18));
+    await cJPY.connect(jane).approve(NFT.address, parseUnits('16000', 18));
+    await cJPY.connect(satoshi).approve(NFT.address, parseUnits('20000', 18));
+    await cJPY.connect(otherUser).approve(NFT.address, parseUnits('25000', 18));
+
   });
   describe('Price changing for NFT', () => {
     it('The NFT Should have price of 10000 cJPY', async () => {
@@ -75,13 +79,25 @@ describe('Cit NFT Tests', () => {
       await expect(NFT.mintTo(NFTUri, john.address)).to.be.revertedWith('CJPY: INSUFFICIENT FUNDS TO PURCHASE NFT');
     });
 
-    it('Should revert minting the locked contract', async () => {
+    it('Trying to mint the token while contract is locked', async () => {
       await NFT.lock(true);
       await expect(NFT.connect(jane).mint(NFTUri)).to.be.revertedWith('ERROR: CONTRACT LOCKED');
     });
 
     it('Should Successfully claim NFT', async () => {
       expect(await NFT.connect(satoshi).mint(NFTUri)).to.emit('CitNFT', 'BoughtNFT');
+    });
+
+    it('Claiming NFT should make cJPY balance 0', async () => {
+      await NFT.connect(satoshi).mint(NFTUri);
+      expect(await cJPY.balanceOf(satoshi.address)).to.be.eq('0');
+    });
+
+    it('Trying to claim NFT with lower allowances than Earned cJPY', async () => {
+      await cJPY.connect(satoshi).approve(NFT.address, parseUnits('19000', 18));
+      await expect(NFT.connect(satoshi).mint(NFTUri)).to.be.revertedWith(
+        'CJPY: INSUFFICIENT ALLOWANCE TO PURCHASE NFT');
+      expect(await cJPY.balanceOf(satoshi.address)).to.be.eq(parseUnits('20000', 18));
     });
 
     it('Non-whitelisted users should not be able to claim tokens', async () => {
