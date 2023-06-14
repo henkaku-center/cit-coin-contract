@@ -84,6 +84,11 @@ describe('Cit NFT Tests', () => {
       expect(await NFT.connect(satoshi).mint(NFTUri)).to.emit('CitNFT', 'BoughtNFT');
     });
 
+    it('Non-whitelisted users should not be able to claim tokens', async () => {
+      await expect(NFT.connect(otherUser).mint(NFTUri)).to.be.revertedWith(
+        'REGISTRY: USER NOT WHITELISTED');
+    });
+
     it('Contract owner should successfully claim NFT for student', async () => {
       expect(await NFT.mintTo(NFTUri, jane.address)).to.emit('CitNFT', 'BoughtNFT');
     });
@@ -116,6 +121,13 @@ describe('Cit NFT Tests', () => {
     it('Trying to transfer non-existent token', async () => {
       await expect(NFT.transferFrom(satoshi.address, jane.address, 1)).to.be.revertedWith(
         'ERC721Metadata: NONEXISTENT TOKEN.',
+      );
+    });
+
+    it('Trying to transfer token to non-whitelisted address', async () => {
+      await NFT.connect(satoshi).mint(NFTUri);
+      await expect(NFT.transferFrom(satoshi.address, otherUser.address, 1)).to.be.revertedWith(
+        'REGISTRY: USER NOT WHITELISTED',
       );
     });
 

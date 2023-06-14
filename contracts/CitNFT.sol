@@ -95,7 +95,8 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
     address _from,
     address _to,
     uint256 _tokenId
-  ) public virtual override onlyOwner hasTokenId(_tokenId){
+  ) public virtual override onlyOwner hasTokenId(_tokenId) {
+    require(registry.isWhitelisted(_to), 'REGISTRY: USER NOT WHITELISTED');
     _transfer(_from, _to, _tokenId);
   }
 
@@ -112,6 +113,7 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
   function _mint(string memory _tokenUri, address _to) internal onlyNoneHolder(msg.sender) onlyUnlocked returns (uint256) {
     uint256 userBalance = cJPY.balanceOf(_to);
     require(userBalance >= price, 'CJPY: INSUFFICIENT FUNDS TO PURCHASE NFT');
+    require(registry.isWhitelisted(_to), 'REGISTRY: USER NOT WHITELISTED');
     _tokenIds.increment();
     uint256 newItemId = _tokenIds.current();
     _safeMint(_to, newItemId);
