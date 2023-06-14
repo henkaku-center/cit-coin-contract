@@ -100,6 +100,30 @@ describe('Cit NFT Tests', () => {
       await NFT.update(1, `${NFTUri}1`);
       expect(await NFT.tokenURI(1)).to.eq(`${NFTUri}1`);
     });
+    it('Trying to update the non-existent token', async () => {
+      await expect(NFT.update(2, NFTUri)).to.be.revertedWith('ERC721Metadata: NONEXISTENT TOKEN.');
+    });
   });
 
+  describe('Transferring tokens', () => {
+
+    it('Successful transfer by an admin', async () => {
+      await NFT.connect(satoshi).mint(NFTUri);
+      await NFT.transferFrom(satoshi.address, jane.address, 1);
+      expect(await NFT.ownerOf(1)).to.eq(jane.address);
+    });
+
+    it('Trying to transfer non-existent token', async () => {
+      await expect(NFT.transferFrom(satoshi.address, jane.address, 1)).to.be.revertedWith(
+        'ERC721Metadata: NONEXISTENT TOKEN.',
+      );
+    });
+
+    it('Trying to transfer token by other than owner', async () => {
+      await NFT.connect(satoshi).mint(NFTUri);
+      await expect(NFT.connect(satoshi).transferFrom(satoshi.address, jane.address, 1)).to.be.revertedWith(
+        'Ownable: caller is not the owner',
+      );
+    });
+  });
 });

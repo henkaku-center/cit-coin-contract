@@ -95,7 +95,7 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
     address _from,
     address _to,
     uint256 _tokenId
-  ) public virtual override onlyOwner {
+  ) public virtual override onlyOwner hasTokenId(_tokenId){
     _transfer(_from, _to, _tokenId);
   }
 
