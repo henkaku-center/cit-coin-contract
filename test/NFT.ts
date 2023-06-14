@@ -13,7 +13,6 @@ describe('Cit NFT Tests', () => {
 
     registry: Contract,
     cJPY: Contract,
-    learnToEarn: Contract,
     NFT: Contract;
 
   let NFTUri = 'https://example.com/ipfs/token.png';
@@ -33,10 +32,7 @@ describe('Cit NFT Tests', () => {
     cJPY = await cJpyFactory.deploy(registry.address);
     await cJPY.deployed();
 
-    learnToEarn = await learnToEarnFactory.deploy(registry.address, cJPY.address, owner.address);
-    await learnToEarn.deployed();
-
-    NFT = await nftFactory.deploy(registry.address, cJPY.address, learnToEarn.address);
+    NFT = await nftFactory.deploy(registry.address, cJPY.address);
     await NFT.deployed();
 
     await registry.bulkAddToWhitelist([
@@ -48,19 +44,37 @@ describe('Cit NFT Tests', () => {
       otherUser.address,
     ]);
 
-    await cJPY.mint(owner.address, parseUnits('100000', 18));
     await cJPY.mint(john.address, parseUnits('8000', 18));
     await cJPY.mint(jane.address, parseUnits('16000', 18));
     await cJPY.mint(satoshi.address, parseUnits('20000', 18));
     await cJPY.mint(otherUser.address, parseUnits('25000', 18));
     await registry.removeFromWhitelist(otherUser.address);
     //
-    // await NFT.setPrice(parseUnits('10000', 18));
+    await NFT.setPrice(parseUnits('10000', 18));
+
+  });
+  describe('Price changing for NFT', () => {
+    it('The NFT Should have price of 10000 cJPY', async () => {
+      expect(await NFT.price()).to.eq(parseUnits('10000', 18));
+    });
+
+    it('Changing the price of an NFT', async () => {
+      await NFT.setPrice(parseUnits('20000', 18));
+      expect(await NFT.price()).to.eq(parseUnits('20000', 18));
+    });
+
+    it('Revert the transaction when price is set below 1 cJPY', async () => {
+      await expect(NFT.setPrice(parseUnits('1', 16))).to.be.revertedWith(
+        'NFT_PRICE_ERROR: THE PRICE CANNOT BE LESS THAN 1e18');
+    });
 
   });
 
-  it('Should Revert transaction with less than 10000 cJPY', async () => {
-    expect(0).to.eq(0);
-      expect(await NFT.mintNFT(NFTUri, john.address).to.be.revertedWith('Insufficient Tokens'));
+  describe('Claiming NFT', () => {
+    it('Should Revert transaction with less than 10000 cJPY', async () => {
+      await expect(NFT.mintNFT(NFTUri, john.address)).to.be.revertedWith('CJPY: INSUFFICIENT FUNDS TO PURCHASE NFT');
+    });
+
   });
+
 });

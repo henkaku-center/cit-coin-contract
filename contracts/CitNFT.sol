@@ -19,7 +19,6 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
   IERC20 public cJPY;
-  ILearnToEarn public learnToEarn;
 
   uint256 public price;   // amount of cJPY needed to mint an NFT
   string private _contractURI;
@@ -44,20 +43,18 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
   /**
    * @param _registry:  Address of the registry Contract
    * @param _cJpy:  Address of the cJpy Contract
-   * @param _learnToEarn: Address of the Learn to Earn Contract
    */
-  constructor(IRegistry _registry, IERC20 _cJpy, ILearnToEarn _learnToEarn)
+  constructor(IRegistry _registry, IERC20 _cJpy)
   ERC721('Cit NFT', 'CNFT')
   Whitelistable(_registry) {
     cJPY = _cJpy;
     registry = _registry;
-    learnToEarn = _learnToEarn;
-    setPrice(8000e18);
+    setPrice(1e22); // 10,000 CJPY
   }
 
   function setPrice(uint256 _price) public onlyOwner {
     /// Sets the price of the token that needs to be spent to earn the NFT.
-    require(_price >= 1e18, 'MUST BE GTE 1e18');
+    require(_price >= 1e18, 'NFT_PRICE_ERROR: THE PRICE CANNOT BE LESS THAN 1e18');
     price = _price;
   }
 
@@ -70,10 +67,13 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
   }
 
   function _mint(string memory _tokenUri, address _to) internal onlyNoneHolder(msg.sender) returns (uint256) {
+    uint256 userBalance = cJPY.balanceOf(_to);
+    require(userBalance >= price, 'CJPY: INSUFFICIENT FUNDS TO PURCHASE NFT');
     _tokenIds.increment();
     uint256 newItemId = _tokenIds.current();
     _safeMint(_to, newItemId);
     _setTokenURI(newItemId, _tokenUri);
+    emit BoughtNFT(_to, userBalance);
     return newItemId;
   }
 
@@ -87,19 +87,11 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
     _setTokenURI(tokenId, finalTokenUri);
   }
 
-  function claimToken() public {
-    (uint256 points,) = learnToEarn.userAttributes(msg.sender);
-    require(cJPY.balanceOf(address(this)) >= points, 'INSUFFICIENT FUND IN WALLET');
-    bool success = cJPY.transfer(msg.sender, points);
-    require(success, 'TX FAILED');
-    emit BoughtNFT(msg.sender, points);
+  function mintNFT(string memory tokenURI, address to) external onlyOwner returns (uint256){
+    return _mint(tokenURI, to);
   }
 
-  function mintNFT(string memory tokenURI, address to) external returns (uint256){
-    (uint256 points,) = learnToEarn.userAttributes(msg.sender);
-    require(cJPY.balanceOf(to) >= points, 'INSUFFICIENT FUND IN WALLET');
-    uint256 tokenId = _mint(tokenURI, to);
-    emit BoughtNFT(msg.sender, points);
-    return tokenId;
+  function claimNFT(string memory tokenUri) external returns (uint256) {
+    return _mint(tokenUri, msg.sender);
   }
 }
