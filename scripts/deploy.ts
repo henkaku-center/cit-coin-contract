@@ -24,7 +24,6 @@ const contractConfigs: ContractConfig[] = [
     args: [
       process.env.REGISTRY_ADDRESS as string,
       process.env.CJPY_ADDRESS as string,
-      process.env.LEARN_TO_EARN_ADDRESS as string,
     ],
   },
   {
