@@ -21,7 +21,7 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
   IERC20 public cJPY;
   uint256 public price;   // amount of cJPY needed to mint an NFT
   string private _contractURI;
-  mapping(address => uint256) public earnedTokens;  // mapping of user vs earned token
+  mapping(address => uint256) public earnedToken;  // mapping of user vs earned token
   bool public locked;
 
   event BoughtNFT(address _owner, uint256 _tokenId);
@@ -98,6 +98,9 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
   ) public virtual override onlyOwner hasTokenId(_tokenId) {
     require(registry.isWhitelisted(_to), 'REGISTRY: USER NOT WHITELISTED');
     _transfer(_from, _to, _tokenId);
+//    earnedToken[_to] = earnedTokens[_from];
+//    earnedToken[_from] = 0;
+
   }
 
   /**
@@ -120,6 +123,7 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
     cJPY.transferFrom(_to, owner(), userBalance);
     _safeMint(_to, newItemId);
     _setTokenURI(newItemId, _tokenUri);
+    earnedToken[_to] = newItemId;
     emit BoughtNFT(_to, userBalance);
     return newItemId;
   }
@@ -133,8 +137,8 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
    * @param _tokenId Id of the NFT
    */
   function _afterTokenTransfer(address _from, address _to, uint256 _tokenId) internal virtual {
-    earnedTokens[_to] = _tokenId;
-    delete earnedTokens[_from];
+    earnedToken[_to] = _tokenId;
+    delete earnedToken[_from];
   }
 
   /**

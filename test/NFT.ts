@@ -82,10 +82,13 @@ describe('Cit NFT Tests', () => {
     it('Trying to mint the token while contract is locked', async () => {
       await NFT.lock(true);
       await expect(NFT.connect(jane).mint(NFTUri)).to.be.revertedWith('ERROR: CONTRACT LOCKED');
+            expect(await NFT.earnedToken(jane.address)).to.be.eq(0);
+
     });
 
     it('Should Successfully claim NFT', async () => {
       expect(await NFT.connect(satoshi).mint(NFTUri)).to.emit('CitNFT', 'BoughtNFT');
+      expect(await NFT.earnedToken(satoshi.address)).to.be.eq(1);
     });
 
     it('Claiming NFT should make cJPY balance 0', async () => {
