@@ -173,6 +173,16 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
     return _mint(tokenUri, msg.sender);
   }
 
+  function burn(uint256 _tokenId) public {
+    require(
+      _isApprovedOrOwner(msg.sender, _tokenId) || msg.sender == owner(),
+      'ERROR: BURNING_NOT_ALLOWED'
+    );
+    address owner = ownerOf(_tokenId);
+    _burn(_tokenId);
+    delete earnedToken[owner];
+  }
+
   /**
    * @dev We do not need transfer methods since this token can not be transferred
    * to anyone. The functions related to transfer are strictly forbidden

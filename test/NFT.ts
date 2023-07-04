@@ -161,4 +161,23 @@ describe('Cit NFT Tests', () => {
     //   );
     // });
   });
+
+  describe('Burning NFTs', () => {
+    it('Successfully burn the token by the token owner', async () => {
+      await NFT.connect(satoshi).mint(NFTUri);
+      expect(await NFT.earnedToken(satoshi.address)).to.equal(1);
+      await expect(NFT.connect(satoshi).burn(1)).not.to.be.reverted;
+      expect(await NFT.earnedToken(satoshi.address)).to.equal(0);
+    });
+
+    it('Successfully burn the token by the contract owner', async () => {
+      await NFT.connect(satoshi).mint(NFTUri);
+      await expect(NFT.burn(1)).not.to.be.reverted;
+    });
+
+    it('revert the burning of an NFT if it is not approved user', async () => {
+      await NFT.connect(satoshi).mint(NFTUri);
+      await expect(NFT.connect(john).burn(1)).to.be.revertedWith('ERROR: BURNING_NOT_ALLOWED');
+    });
+  });
 });
