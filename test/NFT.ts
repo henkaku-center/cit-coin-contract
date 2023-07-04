@@ -134,30 +134,29 @@ describe('Cit NFT Tests', () => {
 
   describe('Transferring tokens', () => {
 
-    it('Successful transfer by an admin', async () => {
+    it('Should revert with message forbidden', async () => {
       await NFT.connect(satoshi).mint(NFTUri);
-      await NFT.transferFrom(satoshi.address, jane.address, 1);
-      expect(await NFT.ownerOf(1)).to.eq(jane.address);
+      await expect(NFT.transferFrom(satoshi.address, jane.address, 1)).to.be.revertedWith("forbidden");
     });
 
-    it('Trying to transfer non-existent token', async () => {
-      await expect(NFT.transferFrom(satoshi.address, jane.address, 1)).to.be.revertedWith(
-        'ERC721Metadata: NONEXISTENT TOKEN.',
-      );
-    });
+    // it('Trying to transfer non-existent token', async () => {
+    //   await expect(NFT.transferFrom(satoshi.address, jane.address, 1)).to.be.revertedWith(
+    //     'ERC721Metadata: NONEXISTENT TOKEN.',
+    //   );
+    // });
 
-    it('Trying to transfer token to non-whitelisted address', async () => {
-      await NFT.connect(satoshi).mint(NFTUri);
-      await expect(NFT.transferFrom(satoshi.address, otherUser.address, 1)).to.be.revertedWith(
-        'REGISTRY: USER NOT WHITELISTED',
-      );
-    });
+    // it('Trying to transfer token to non-whitelisted address', async () => {
+    //   await NFT.connect(satoshi).mint(NFTUri);
+    //   await expect(NFT.transferFrom(satoshi.address, otherUser.address, 1)).to.be.revertedWith(
+    //     'REGISTRY: USER NOT WHITELISTED',
+    //   );
+    // });
 
-    it('Trying to transfer token by other than owner', async () => {
-      await NFT.connect(satoshi).mint(NFTUri);
-      await expect(NFT.connect(satoshi).transferFrom(satoshi.address, jane.address, 1)).to.be.revertedWith(
-        'Ownable: caller is not the owner',
-      );
-    });
+    // it('Trying to transfer token by other than owner', async () => {
+    //   await NFT.connect(satoshi).mint(NFTUri);
+    //   await expect(NFT.connect(satoshi).transferFrom(satoshi.address, jane.address, 1)).to.be.revertedWith(
+    //     'Ownable: caller is not the owner',
+    //   );
+    // });
   });
 });
