@@ -10,13 +10,11 @@ describe('Cit NFT Tests', () => {
     jane: SignerWithAddress,
     satoshi: SignerWithAddress,
     otherUser: SignerWithAddress,
-
     registry: Contract,
     cJPY: Contract,
     NFT: Contract;
 
   let NFTUri = 'https://example.com/ipfs/token.png';
-
 
   beforeEach(async () => {
     [owner, john, jane, satoshi, otherUser] = await ethers.getSigners();
@@ -55,7 +53,6 @@ describe('Cit NFT Tests', () => {
     await cJPY.connect(jane).approve(NFT.address, parseUnits('16000', 18));
     await cJPY.connect(satoshi).approve(NFT.address, parseUnits('20000', 18));
     await cJPY.connect(otherUser).approve(NFT.address, parseUnits('25000', 18));
-
   });
   describe('Price changing for NFT', () => {
     it('The NFT Should have price of 10000 cJPY', async () => {
@@ -69,21 +66,22 @@ describe('Cit NFT Tests', () => {
 
     it('Revert the transaction when price is set below 1 cJPY', async () => {
       await expect(NFT.setPrice(parseUnits('1', 16))).to.be.revertedWith(
-        'NFT_PRICE_ERROR: THE PRICE CANNOT BE LESS THAN 1e18');
+        'NFT_PRICE_ERROR: THE PRICE CANNOT BE LESS THAN 1e18',
+      );
     });
-
   });
 
   describe('Claiming NFT', () => {
     it('Should Revert transaction with less than 10000 cJPY', async () => {
-      await expect(NFT.mintTo(NFTUri, john.address)).to.be.revertedWith('CJPY: INSUFFICIENT FUNDS TO PURCHASE NFT');
+      await expect(NFT.mintTo(NFTUri, john.address)).to.be.revertedWith(
+        'CJPY: INSUFFICIENT FUNDS TO PURCHASE NFT',
+      );
     });
 
     it('Trying to mint the token while contract is locked', async () => {
       await NFT.lock(true);
       await expect(NFT.connect(jane).mint(NFTUri)).to.be.revertedWith('ERROR: CONTRACT LOCKED');
-            expect(await NFT.earnedToken(jane.address)).to.be.eq(0);
-
+      expect(await NFT.earnedToken(jane.address)).to.be.eq(0);
     });
 
     it('Should Successfully claim NFT', async () => {
@@ -95,20 +93,21 @@ describe('Cit NFT Tests', () => {
       await NFT.connect(satoshi).mint(NFTUri);
       expect(await cJPY.balanceOf(satoshi.address)).to.be.eq('0');
       expect(await cJPY.balanceOf(owner.address)).to.be.eq(parseUnits('20000', 18));
-
     });
 
     it('Trying to claim NFT with lower allowances than Earned cJPY', async () => {
       await cJPY.connect(satoshi).approve(NFT.address, parseUnits('19000', 18));
       await expect(NFT.connect(satoshi).mint(NFTUri)).to.be.revertedWith(
-        'CJPY: INSUFFICIENT ALLOWANCE TO PURCHASE NFT');
+        'CJPY: INSUFFICIENT ALLOWANCE TO PURCHASE NFT',
+      );
       expect(await cJPY.balanceOf(satoshi.address)).to.be.eq(parseUnits('20000', 18));
       expect(await cJPY.balanceOf(owner.address)).to.be.eq(parseUnits('0', 18));
     });
 
     it('Non-whitelisted users should not be able to claim tokens', async () => {
       await expect(NFT.connect(otherUser).mint(NFTUri)).to.be.revertedWith(
-        'REGISTRY: USER NOT WHITELISTED');
+        'REGISTRY: USER NOT WHITELISTED',
+      );
     });
 
     it('Contract owner should successfully claim NFT for student', async () => {
@@ -117,7 +116,9 @@ describe('Cit NFT Tests', () => {
 
     it('Contract should revert minting the token again', async () => {
       await NFT.connect(satoshi).mint(NFTUri);
-      await expect(NFT.connect(satoshi).mint(NFTUri)).to.be.revertedWith('ERROR: USER ALREADY HOLDS THIS NFT');
+      await expect(NFT.connect(satoshi).mint(NFTUri)).to.be.revertedWith(
+        'ERROR: USER ALREADY HOLDS THIS NFT',
+      );
     });
   });
 
@@ -133,10 +134,11 @@ describe('Cit NFT Tests', () => {
   });
 
   describe('Transferring tokens', () => {
-
     it('Should revert with message forbidden', async () => {
       await NFT.connect(satoshi).mint(NFTUri);
-      await expect(NFT.transferFrom(satoshi.address, jane.address, 1)).to.be.revertedWith("forbidden");
+      await expect(NFT.transferFrom(satoshi.address, jane.address, 1)).to.be.revertedWith(
+        'forbidden',
+      );
     });
 
     // it('Trying to transfer non-existent token', async () => {

@@ -24,7 +24,7 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
   mapping(address => uint256) public earnedToken; // mapping of user vs earned token
   bool public locked;
 
-  event BoughtNFT(address _owner, uint256 _tokenId);
+  event BoughtNFT(address _owner, uint256 _price, uint256 _newItemId);
 
   modifier onlyNoneHolder(address _address) {
     require(balanceOf(_address) == 0, 'ERROR: USER ALREADY HOLDS THIS NFT');
@@ -123,7 +123,7 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
     _safeMint(_to, newItemId);
     _setTokenURI(newItemId, _tokenUri);
     earnedToken[_to] = newItemId;
-    emit BoughtNFT(_to, userBalance);
+    emit BoughtNFT(_to, userBalance, newItemId);
     return newItemId;
   }
 
