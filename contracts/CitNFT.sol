@@ -66,7 +66,7 @@ contract CitNFT is ERC721URIStorage, Ownable, Whitelistable {
   constructor(
     IRegistry _registry,
     IERC20 _cJpy
-  ) ERC721('Introducetion to Web3', 'CIT-WEB3') Whitelistable(_registry) {
+  ) ERC721('Introduction to Web3', 'CITWEB3') Whitelistable(_registry) {
     cJPY = _cJpy;
     registry = _registry;
     setPrice(1e22); // 10,000 CJPY
