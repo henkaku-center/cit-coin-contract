@@ -14,10 +14,9 @@ const config: HardhatUserConfig = {
       },
     },
   },
-  // defaultNetwork: (process.env.NETWORK as string) || 'polygon_mumbai',
   networks: {
     polygon: {
-      url: 'https://rpc-mainnet.maticvigil.com/',
+      url: 'https://polygon.drpc.org/',
       accounts: [process.env.PRIVATE_KEY as string],
       // allowUnlimitedContractSize: true,
     },
