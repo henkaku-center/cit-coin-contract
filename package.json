@@ -45,6 +45,7 @@
     "deploy:mainnet:learn": "npx hardhat run scripts/deployLearnToEarn.ts --network polygon",
     "deploy:testnet": "npx hardhat run scripts/deploy.ts --network amoy",
     "deploy:testnet:learn": "npx hardhat run scripts/deployLearnToEarn.ts --network amoy",
+    "mint:testnet:cjpy": "npx hardhat run scripts/mintCJPY.ts --network amoy",
     "verify:cit-coin-test": "npx hardhat verify --network amoy --contract contracts/CitCoin.sol:CitCoin",
     "verify:cjpy-test": "npx hardhat verify --network amoy --contract contracts/cJPY.sol:CJPY",
     "verify:faucet-test": "npx hardhat verify --network amoy --contract contracts/Faucet.sol:Faucet",
