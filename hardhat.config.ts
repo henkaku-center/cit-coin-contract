@@ -15,28 +15,25 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
-    polygon: {
-      url: 'https://polygon.drpc.org/',
-      accounts: [process.env.PRIVATE_KEY as string],
-      // allowUnlimitedContractSize: true,
+    optimism: {
+      url: 'https://mainnet.optimism.io', // Optimism mainnet RPC URL
+      accounts: [process.env.PRIVATE_KEY || ''],
     },
-
-    amoy: {
-      url: 'https://rpc-amoy.polygon.technology/',
-      accounts: [process.env.PRIVATE_KEY as string],
-      // gasPrice: 1e5,
-      // gas: 1e5
+    optimismSepolia: {
+      url: 'https://sepolia.optimism.io', // Optimism Sepolia testnet RPC URL
+      accounts: [process.env.PRIVATE_KEY || ''],
+      chainId: 11155420,
     },
   },
   etherscan: {
-    apiKey: process.env.POLYGONSCAN_API_KEY,
+    apiKey: process.env.OPTIMISM_ETHERSCAN_API_KEY || '',
     customChains: [
       {
-        network: 'amoy',
-        chainId: 80002,
+        chainId: 11155420,
+        network: 'optimismSepolia',
         urls: {
-          apiURL: 'https://api-amoy.polygonscan.com/api',
-          browserURL: 'https://amoy.polygonscan.com',
+          apiURL: 'https://api-sepolia-optimistic.etherscan.io/api',
+          browserURL: 'https://sepolia-optimistic.etherscan.io',
         },
       },
     ],
