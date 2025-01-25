@@ -8,6 +8,9 @@
     - [Compiling Contracts:](#compiling-contracts)
     - [Deploying Contracts](#deploying-contracts)
     - [Verifying Contracts](#verifying-contracts)
+      - [1. Verifying `Registry` Contract](#1-verifying-registry-contract)
+      - [2. Verifying `cJPY` Contract](#2-verifying-cjpy-contract)
+      - [3. Verifying `LearnToEarn` Contract](#3-verifying-learntoearn-contract)
 
 
 ## Introduction [ 序章 ]
@@ -18,16 +21,16 @@ Cit-Coin プロジェクトは、ハードハット プロジェクトに準拠�
 
 ## Contracts [ コントラクツ ]
 
-1. `cJPY` [ CIT Coin コントラクツ ]
-2. `LearnToEarn` [ Learn To Earn コントラクツ ]
-3. `CitNFT`
-4. `Faucet`
+1. `Registry`
+2. `cJPY` [ CIT Coin コントラクツ ]
+3. `LearnToEarn` [ Learn To Earn コントラクツ ]
+4. `CitNFT`
+5. `Faucet`
 
 ## Abstract Contracts
 
 1. `Ownable`
-2. `Registry`
-3. `Whitelistable`
+2. `Whitelistable`
 
 ### Compiling Contracts:
 
@@ -41,36 +44,99 @@ yarn compile
 
 ### Deploying Contracts
 
-To deploy contracts, we need to run `yarn deploy` command.
+To deploy contracts, we need to run `yarn deploy:mainnet` or `yarn deploy:testnet`
+command which will use the interactive shell to select options if not used in
+the environment variable.
 
 ```shell
 
-# Deploying `cJPY` and `LearnToEarn` in the testnet
+# Deploying contracts in the testnet
 
-yarn deploy:cjpy
-yarn deploy:learn-test
+yarn deploy:testnet
 
-# deploying `cJPY` and `LearnToEarn` in the mainnet
-yarn deploy:cjpy
-yarn deploy:learn
+Please select one of the contracts below:
+
+0. CitNFT
+1. CJPY
+2. Faucet
+3. LearnToEarn
+4. Registry
+
+Select The Contract to deploy [Eg: 1]: 1
+
+Deploying Contract with the following configuration:
+{
+  name: 'CJPY',
+  ownable: false,
+  args: [ '0x071AF28249749a53245057aBD9cd8f1ea488eABB' ]
+}
+======================================================================
+  Contract Address:  0xFF38186A92373C41CDCcD98F414Aa2fBA346653D
+======================================================================
+
 ```
 
 ### Verifying Contracts
 
-To verify Contract, we must provide 3 different addresses as arguments to the
-`yarn verify` command.
+While verifying contracts, we need an `address` of the deployed contract
+and other arguments if needed by the contract.
 
-1. Address of the deployed contract
-2. Address of `cJPY`
-3. Fund Address
+The Contract first needs to be deployed before verifying. Sometimes, one contract
+requires another contract to be deployed before verifying that contract.
+
+For example: `cJPY` needs `Registry` to be deployed so that it can be passed in
+the constructor arguments.
+
 
 > **Note**: you must add `PRIVATE_KEY` to an environment variable or `.env`
 > file to be able to verify the contract.
 
-```shell
 
-yarn verify:learn-test 0xE1518892F9A3AF85B7a208323ed69F644bDE12b5 0x6631420dDA4C985657D008F71f36850fD70e5Ad9 0x137ea0e26414eb73BB08e601E28072781962f810
+#### 1. Verifying `Registry` Contract
 
+```bash
+# verifying on testnet
+yarn verify:registry-test <REGISTRY_CONTRACT_ADDRESS>
+
+# verifying on mainnet
+yarn verify:registry <REGISTRY_CONTRACT_ADDRESS>
+
+# Example
+yarn verify:registry 0x071AF28249749a53245057aBD9cd8f1ea488eABB
+```
+
+#### 2. Verifying `cJPY` Contract
+This contract first needs to be deployed
+
+```bash
+# verifying on testnet
+yarn verify:cjpy-test <CONTRACT_ADDRESS> <REGISTRY_ADDRESS>
+
+# verifying on mainnet
+yarn verify:cjpy <CONTRACT_ADDRESS> <REGISTRY_ADDRESS>
+
+# Example:
+yarn verify:cjpy-test 0xFF38186A92373C41CDCcD98F414Aa2fBA346653D 0x071AF28249749a53245057aBD9cd8f1ea488eABB
+```
+
+#### 3. Verifying `LearnToEarn` Contract
+To verify this Contract, we must provide 3 different addresses as arguments to the
+`yarn verify` command.
+
+1. Address of the deployed contract
+2. Address of `registry`
+3. Address of `cJPY`
+4. Fund Address
+
+```bash
+# verifying on testnet
+yarn verify:learn-test <CONTRACT_ADDRESS> <CJPY_ADDRESS> <FUND_ADDRESS>
+
+# verifying on mainnet
+yarn verify:learn <CONTRACT_ADDRESS> <CJPY_ADDRESS> <FUND_ADDRESS>
+
+# Example:
+yarn verify:learn-test 0xD37A8C0789aE9690b0881668E0D12aEAf75773e4 0x071AF28249749a53245057aBD9cd8f1ea488eABB 0xFF38186A92373C41CDCcD98F414Aa2fBA346653D 0x137ea0e26414eb73BB08e601E28072781962f810
 ```
 
 **Similar Commands**
