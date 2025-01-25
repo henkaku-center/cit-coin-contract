@@ -11,6 +11,9 @@
       - [1. Verifying `Registry` Contract](#1-verifying-registry-contract)
       - [2. Verifying `cJPY` Contract](#2-verifying-cjpy-contract)
       - [3. Verifying `LearnToEarn` Contract](#3-verifying-learntoearn-contract)
+      - [4. Verifying `Faucet` Contract](#4-verifying-faucet-contract)
+      - [4. Verifying `NFT` Contract](#4-verifying-nft-contract)
+  - [Other Commands](#other-commands)
 
 
 ## Introduction [ 序章 ]
@@ -62,16 +65,19 @@ Please select one of the contracts below:
 3. LearnToEarn
 4. Registry
 
-Select The Contract to deploy [Eg: 1]: 1
-
+Select The Contract to deploy [Eg: 1]:  2
+2
 Deploying Contract with the following configuration:
 {
-  name: 'CJPY',
-  ownable: false,
-  args: [ '0x071AF28249749a53245057aBD9cd8f1ea488eABB' ]
+  name: 'Faucet',
+  ownable: true,
+  args: [
+    '0x071AF28249749a53245057aBD9cd8f1ea488eABB',
+    '0x137ea0e26414eb73BB08e601E28072781962f810'
+  ]
 }
 ======================================================================
-  Contract Address:  0xFF38186A92373C41CDCcD98F414Aa2fBA346653D
+  Contract Address:  0x0E4587481c947f0aad33143e8b55E06f118036ac
 ======================================================================
 
 ```
@@ -86,6 +92,33 @@ requires another contract to be deployed before verifying that contract.
 
 For example: `cJPY` needs `Registry` to be deployed so that it can be passed in
 the constructor arguments.
+
+> **NOTE**: The arguments that are printed in the interactive console will be
+> required while verifying the contracts. We can simply scroll the shell up to
+> see the arguments that were passed to deploy the contract.
+>
+> example: for `Faucet`, the console output looks like below:
+> ```shell
+>    Select The Contract to deploy [Eg: 1]:  2
+>    2
+>    Deploying Contract with the following configuration:
+>    {
+>    name: 'Faucet',
+>    ownable: true,
+>    args: [
+>        '0x071AF28249749a53245057aBD9cd8f1ea488eABB',
+>        '0x137ea0e26414eb73BB08e601E28072781962f810'
+>    ]
+>    }
+>    ======================================================================
+>    Contract Address:  0x0E4587481c947f0aad33143e8b55E06f118036ac
+>    ======================================================================
+> ```
+> This means the verify command also needs the following addresses:
+> - `contract address`: `0x0E4587481c947f0aad33143e8b55E06f118036ac`
+> - `args[0]`: `0x071AF28249749a53245057aBD9cd8f1ea488eABB`
+> - `args[1]`: `0x137ea0e26414eb73BB08e601E28072781962f810`
+
 
 
 > **Note**: you must add `PRIVATE_KEY` to an environment variable or `.env`
@@ -120,7 +153,7 @@ yarn verify:cjpy-test 0xFF38186A92373C41CDCcD98F414Aa2fBA346653D 0x071AF28249749
 ```
 
 #### 3. Verifying `LearnToEarn` Contract
-To verify this Contract, we must provide 3 different addresses as arguments to the
+To verify this Contract, we must provide 4 different addresses as arguments to the
 `yarn verify` command.
 
 1. Address of the deployed contract
@@ -130,16 +163,54 @@ To verify this Contract, we must provide 3 different addresses as arguments to t
 
 ```bash
 # verifying on testnet
-yarn verify:learn-test <CONTRACT_ADDRESS> <CJPY_ADDRESS> <FUND_ADDRESS>
+yarn verify:learn-test <CONTRACT_ADDRESS> <REGISTRY_ADDRESS> <CJPY_ADDRESS> <FUND_ADDRESS>
 
 # verifying on mainnet
-yarn verify:learn <CONTRACT_ADDRESS> <CJPY_ADDRESS> <FUND_ADDRESS>
+yarn verify:learn <CONTRACT_ADDRESS> <REGISTRY_ADDRESS> <CJPY_ADDRESS> <FUND_ADDRESS>
 
 # Example:
 yarn verify:learn-test 0xD37A8C0789aE9690b0881668E0D12aEAf75773e4 0x071AF28249749a53245057aBD9cd8f1ea488eABB 0xFF38186A92373C41CDCcD98F414Aa2fBA346653D 0x137ea0e26414eb73BB08e601E28072781962f810
 ```
 
-**Similar Commands**
+#### 4. Verifying `Faucet` Contract
+To verify this Contract, we must provide 3 different addresses as arguments to the
+`yarn verify` command.
+
+1. Address of the deployed contract
+2. Address of `registry`
+4. Fund Address
+
+```bash
+# verifying on testnet
+yarn verify:faucet-test <CONTRACT_ADDRESS> <REGISTRY_ADDRESS> <FUND_ADDRESS>
+
+# verifying on mainnet
+yarn verify:faucet <CONTRACT_ADDRESS> <REGISTRY_ADDRESS> <FUND_ADDRESS>
+
+# Example:
+yarn verify:faucet-test 0x0E4587481c947f0aad33143e8b55E06f118036ac 0x071AF28249749a53245057aBD9cd8f1ea488eABB 0x137ea0e26414eb73BB08e601E28072781962f810
+```
+
+#### 4. Verifying `NFT` Contract
+To verify this Contract, we must provide 3 different addresses as arguments to the
+`yarn verify` command.
+
+1. Address of the deployed contract
+2. Address of `registry`
+4. Address of `cJPY`
+
+```bash
+# verifying on testnet
+yarn verify:nft-test <CONTRACT_ADDRESS> <REGISTRY_ADDRESS> <CJPY_ADDRESS>
+
+# verifying on mainnet
+yarn verify:nft <CONTRACT_ADDRESS> <REGISTRY_ADDRESS> <CJPY_ADDRESS>
+
+# Example:
+yarn verify:nft-test 0x40d5cec4aE77Cbb67bce73b8894B6508329B414F 0x071AF28249749a53245057aBD9cd8f1ea488eABB 0xFF38186A92373C41CDCcD98F414Aa2fBA346653D
+```
+
+## Other Commands
 
 ```shell
 yarn node
