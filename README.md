@@ -1,5 +1,15 @@
 # Cit Coin Contract
 
+**Table Of Contents**:
+- [Cit Coin Contract](#cit-coin-contract)
+  - [Introduction \[ 序章 \]](#introduction--序章-)
+  - [Contracts \[ コントラクツ \]](#contracts--コントラクツ-)
+  - [Abstract Contracts](#abstract-contracts)
+    - [Compiling Contracts:](#compiling-contracts)
+    - [Deploying Contracts](#deploying-contracts)
+    - [Verifying Contracts](#verifying-contracts)
+
+
 ## Introduction [ 序章 ]
 
 The Cit-Coin project is a Hardhat Project that complies with EVM-based decentralized application that facilitates students to learn and earn a cryptocurrency.
@@ -8,8 +18,16 @@ Cit-Coin プロジェクトは、ハードハット プロジェクトに準拠�
 
 ## Contracts [ コントラクツ ]
 
-1. CIT Coin Contract [ CIT Coin コントラクツ ]
-2. Learn To Earn Contract [ Learn To Earn コントラクツ ]
+1. `cJPY` [ CIT Coin コントラクツ ]
+2. `LearnToEarn` [ Learn To Earn コントラクツ ]
+3. `CitNFT`
+4. `Faucet`
+
+## Abstract Contracts
+
+1. `Ownable`
+2. `Registry`
+3. `Whitelistable`
 
 ### Compiling Contracts:
 
@@ -27,12 +45,13 @@ To deploy contracts, we need to run `yarn deploy` command.
 
 ```shell
 
-# deploying Cit Coin and Learn to Earn in the testnet
-yarn deploy:cit-coin-test
+# Deploying `cJPY` and `LearnToEarn` in the testnet
+
+yarn deploy:cjpy
 yarn deploy:learn-test
 
-# deploying Cit Coin and Learn to Earn in the mainnet
-yarn deploy:cit-coin
+# deploying `cJPY` and `LearnToEarn` in the mainnet
+yarn deploy:cjpy
 yarn deploy:learn
 ```
 
@@ -40,8 +59,9 @@ yarn deploy:learn
 
 To verify Contract, we must provide 3 different addresses as arguments to the
 `yarn verify` command.
+
 1. Address of the deployed contract
-2. Address of the CIT Coin
+2. Address of `cJPY`
 3. Fund Address
 
 > **Note**: you must add `PRIVATE_KEY` to an environment variable or `.env`
@@ -58,5 +78,5 @@ yarn verify:learn-test 0xE1518892F9A3AF85B7a208323ed69F644bDE12b5 0x6631420dDA4C
 ```shell
 yarn node
 yarn test
-yarn 
+yarn
 ```

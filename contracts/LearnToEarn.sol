@@ -3,7 +3,6 @@ pragma solidity ^0.8.17;
 
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
-import './CitCoin.sol';
 import './Whitelistable.sol';
 import './cJPY.sol';
 
@@ -30,7 +29,7 @@ contract LearnToEarn is Ownable, Whitelistable {
   Counters.Counter private _tokenIds;
   uint public rewardPoint = 1_000_000_000;
   address public fundAddress;
-//  address public dev; // address for developers to run block-chain on backend to configure
+  //  address public dev; // address for developers to run block-chain on backend to configure
   CJPY public cJpy;
   Quest private weeklyQuest;
   mapping(address => bool) public admins;
@@ -39,7 +38,8 @@ contract LearnToEarn is Ownable, Whitelistable {
 
   // Events
   event CheckedAnswer(address indexed _by, uint256 at);
-//  event ClaimedToken(address _by, uint256 _amount);
+
+  //  event ClaimedToken(address _by, uint256 _amount);
 
   constructor(IRegistry registry, CJPY _cJpy, address _fundAddress) Whitelistable(registry) {
     fundAddress = _fundAddress;
@@ -49,9 +49,9 @@ contract LearnToEarn is Ownable, Whitelistable {
   modifier onlyAdmin() {
     require(
       msg.sender == owner() ||
-      // msg.sender == admin ||
-      admins[msg.sender] == true,
-//      msg.sender == dev,
+        // msg.sender == admin ||
+        admins[msg.sender] == true,
+      //      msg.sender == dev,
       'INVALID: YOU MUST BE AN ADMIN TO CONTINUE'
     );
     _;
@@ -133,7 +133,6 @@ contract LearnToEarn is Ownable, Whitelistable {
     userAttributes[msg.sender].point += rewards;
     userAttributes[msg.sender].answeredAt = block.timestamp;
     cJpy.transferFrom(fundAddress, msg.sender, rewards);
-    // citCoin.transfer(msg.sender, rewards);
     emit CheckedAnswer(msg.sender, userAttributes[msg.sender].answeredAt);
     return correctAnswers;
   }

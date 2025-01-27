@@ -14,17 +14,9 @@ interface ContractConfig {
 
 const contractConfigs: ContractConfig[] = [
   {
-    name: 'CitCoin',
-    ownable: true,
-    args: [],
-  },
-  {
     name: 'CitNFT',
     ownable: true,
-    args: [
-      process.env.REGISTRY_ADDRESS as string,
-      process.env.CJPY_ADDRESS as string,
-    ],
+    args: [process.env.REGISTRY_ADDRESS as string, process.env.CJPY_ADDRESS as string],
   },
   {
     name: 'CJPY',
