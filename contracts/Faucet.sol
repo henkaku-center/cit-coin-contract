@@ -9,13 +9,13 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract Faucet is Ownable, Whitelistable, ReentrancyGuard {
   /**
-   * @dev The `Faucet` contract transfers Matic Coins to users who are enrolled
+   * @dev The `Faucet` contract transfers Crypto Coins to users who are enrolled
    * to the classroom. The whitelisted users are retrieved from the `Registry`
    * contract which is defined in the abstract contract `Whitelistable`.
    */
 
   address public operator;  // the operator address
-  uint256 public offering = 2e16; // 0.02 MATIC
+  uint256 public offering = 2e16; // 0.02 equivalent crypto
 
   bool public locked; // helpful when we want to lock the faucet itself
   uint256 public lockDuration;  // lock duration in seconds
@@ -46,7 +46,7 @@ contract Faucet is Ownable, Whitelistable, ReentrancyGuard {
 
   receive() external payable {
     // fallback function
-    // require(msg.value >= 1e18, 'ERROR: Please send more than 1 MATIC to the faucet.');
+    // require(msg.value >= 1e18, 'ERROR: Please send more than 1 crypto to the faucet.');
     emit FundReceived(msg.sender, msg.value);
   }
 
@@ -73,7 +73,7 @@ contract Faucet is Ownable, Whitelistable, ReentrancyGuard {
 
   function requestTokens(address payable _requestor) external onlyUnlocked onlyOperator nonReentrant {
     /**
-      * @dev The `requestTokens` function transfers MATIC tokens to the user who
+      * @dev The `requestTokens` function transfers Crypto tokens to the user who
       * is enrolled in the classroom.
       * The user can request tokens only after the lock duration is over.
       * The lock duration is set to 1 week by default.
@@ -83,7 +83,7 @@ contract Faucet is Ownable, Whitelistable, ReentrancyGuard {
     require(registry.isWhitelisted(_requestor), 'INVALID: Receiver is not a student or admin');
     require(
       block.timestamp > lockTime[_requestor] + lockDuration,
-      'INVALID: Already received matic coins, please wait until the lock duration is over.'
+      'INVALID: Already received crypto coins, please wait until the lock duration is over.'
     );
     require(address(this).balance > offering, 'ERROR: Not enough funds in the faucet.');
 

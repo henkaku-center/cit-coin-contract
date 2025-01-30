@@ -36,18 +36,22 @@ describe('Faucet', () => {
     it('should receive funds', async () => {
       let balance = await ethers.provider.getBalance(faucet.address);
       // console.log('Current Balance: ', ethers.utils.formatEther(balance));
-      expect(await owner.sendTransaction({
-        to: faucet.address,
-        value: ethers.utils.parseEther('20'),
-      })).to.emit(faucet, 'ReceivedFunds');
-      expect(await ethers.provider.getBalance(faucet.address)).to.equal(balance.add(ethers.utils.parseEther('20')));
+      expect(
+        await owner.sendTransaction({
+          to: faucet.address,
+          value: ethers.utils.parseEther('20'),
+        }),
+      ).to.emit(faucet, 'ReceivedFunds');
+      expect(await ethers.provider.getBalance(faucet.address)).to.equal(
+        balance.add(ethers.utils.parseEther('20')),
+      );
     });
 
-    // it('should not receive funds below 1 matic', async () => {
+    // it('should not receive funds below 1 crypto', async () => {
     //   await expect(owner.sendTransaction({
     //     to: faucet.address,
     //     value: ethers.utils.parseEther('0.9'),
-    //   })).to.be.revertedWith('ERROR: Please send more than 1 MATIC to the faucet.');
+    //   })).to.be.revertedWith('ERROR: Please send more than 1 crypto  to the faucet.');
     // });
 
     it('should be able to withdraw funds by owner', async () => {
@@ -57,36 +61,46 @@ describe('Faucet', () => {
       expect(await ethers.provider.getBalance(faucet.address)).to.equal(0);
       // The approximate value is used because of the gas fees
       expect(await ethers.provider.getBalance(owner.address)).to.approximately(
-        ownerBalance.add(faucetBalance), ethers.utils.parseEther('0.01'));
+        ownerBalance.add(faucetBalance),
+        ethers.utils.parseEther('0.01'),
+      );
     });
 
     it('should not be able to withdraw funds if the faucet has no funds', async () => {
       await faucet.connect(owner).withdrawFunds();
-      await expect(faucet.connect(owner).withdrawFunds()).to.be.revertedWith('ERROR: No funds to withdraw.');
+      await expect(faucet.connect(owner).withdrawFunds()).to.be.revertedWith(
+        'ERROR: No funds to withdraw.',
+      );
     });
 
     it('should not be able to withdraw funds if not owner', async () => {
       let faucetBalance = await ethers.provider.getBalance(faucet.address);
-      await expect(faucet.connect(student).withdrawFunds()).to.be.revertedWith('Ownable: caller is not the owner');
+      await expect(faucet.connect(student).withdrawFunds()).to.be.revertedWith(
+        'Ownable: caller is not the owner',
+      );
       // The balance should not change
       expect(await ethers.provider.getBalance(faucet.address)).to.equal(faucetBalance);
     });
-
   });
 
   describe('Sending Funds', () => {
     it('Fund Transfer Successful', async () => {
       const studentBalance = await ethers.provider.getBalance(student.address);
-      await expect(faucet.connect(server).requestTokens(student.address)).to.emit(faucet, 'RequestedTokens');
-      expect(await ethers.provider.getBalance(student.address)).to.equal(studentBalance.add(ethers.utils.parseEther('0.02')));
-
+      await expect(faucet.connect(server).requestTokens(student.address)).to.emit(
+        faucet,
+        'RequestedTokens',
+      );
+      expect(await ethers.provider.getBalance(student.address)).to.equal(
+        studentBalance.add(ethers.utils.parseEther('0.02')),
+      );
     });
 
     it('Sending Funds twice within the locked time', async () => {
       await faucet.connect(server).requestTokens(student.address);
-      await time.increase(60 * 60 * 24 * 6);  // increase time by 6 days
-      await expect(faucet.connect(server).requestTokens(student.address))
-        .to.be.revertedWith('INVALID: Already received matic coins, please wait until the lock duration is over.');
+      await time.increase(60 * 60 * 24 * 6); // increase time by 6 days
+      await expect(faucet.connect(server).requestTokens(student.address)).to.be.revertedWith(
+        'INVALID: Already received crypto coins, please wait until the lock duration is over.',
+      );
     });
 
     it('Updating the unlock time and requesting the funds', async () => {
@@ -94,32 +108,45 @@ describe('Faucet', () => {
       await faucet.connect(server).requestTokens(student.address);
       const studentBalance = await ethers.provider.getBalance(student.address);
       await time.increase(60 * 60 * 24 * 2); // increase time by 2 days
-      await expect(faucet.connect(server).requestTokens(student.address)).to.emit(faucet, 'RequestedTokens');
-      expect(await ethers.provider.getBalance(student.address)).to.equal(studentBalance.add(ethers.utils.parseEther('0.02')));
+      await expect(faucet.connect(server).requestTokens(student.address)).to.emit(
+        faucet,
+        'RequestedTokens',
+      );
+      expect(await ethers.provider.getBalance(student.address)).to.equal(
+        studentBalance.add(ethers.utils.parseEther('0.02')),
+      );
     });
 
     it('updating the offer amount', async () => {
       const studentBalance = await ethers.provider.getBalance(student.address);
       await faucet.setOffering(ethers.utils.parseEther('5'));
-      await expect(faucet.connect(server).requestTokens(student.address)).to.emit(faucet, 'RequestedTokens');
-      expect(await ethers.provider.getBalance(student.address)).to.equal(studentBalance.add(ethers.utils.parseEther('5')));
+      await expect(faucet.connect(server).requestTokens(student.address)).to.emit(
+        faucet,
+        'RequestedTokens',
+      );
+      expect(await ethers.provider.getBalance(student.address)).to.equal(
+        studentBalance.add(ethers.utils.parseEther('5')),
+      );
     });
 
     it('No funds in the faucet', async () => {
       await faucet.connect(owner).withdrawFunds();
-      await expect(faucet.connect(server).requestTokens(student.address))
-        .to.be.revertedWith('ERROR: Not enough funds in the faucet.');
+      await expect(faucet.connect(server).requestTokens(student.address)).to.be.revertedWith(
+        'ERROR: Not enough funds in the faucet.',
+      );
     });
 
     it('Fund Transfer Unsuccessful to unregistered student', async () => {
-      await expect(faucet.connect(server).requestTokens(other_user.address))
-        .to.be.revertedWith('INVALID: Receiver is not a student or admin');
+      await expect(faucet.connect(server).requestTokens(other_user.address)).to.be.revertedWith(
+        'INVALID: Receiver is not a student or admin',
+      );
     });
 
     it('Locking the faucet', async () => {
       await faucet.lock(true);
-      await expect(faucet.connect(server).requestTokens(student.address))
-        .to.be.revertedWith('ERROR: Contract is locked, please wait until owner unlocks the faucet');
+      await expect(faucet.connect(server).requestTokens(student.address)).to.be.revertedWith(
+        'ERROR: Contract is locked, please wait until owner unlocks the faucet',
+      );
     });
   });
 });
