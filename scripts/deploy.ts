@@ -36,6 +36,12 @@ const contractConfigs: ContractConfig[] = [
       process.env.CJPY_ADDRESS as string,
       process.env.GNOSIS_OWNER as string,
     ],
+    postDeploy: async (learnToEarn: Contract) => {
+      // Necessary to operate a registry contract from learn to earn contract
+      const registryFactory = await ethers.getContractFactory('Registry');
+      const registry = await registryFactory.attach(process.env.REGISTRY_ADDRESS ?? '');
+      await registry.grantRoleAdmin(learnToEarn.address);
+    },
   },
   {
     name: 'Registry',
