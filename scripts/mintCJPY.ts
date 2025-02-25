@@ -7,7 +7,7 @@ async function main() {
   const CJPY_ADDRESS = process.env.CJPY_ADDRESS as string;
   const LEARN_TO_WARN_ADDRESS = process.env.LEARN_TO_WARN_ADDRESS as string;
   const FUND_ADDRESS = process.env.FUND_ADDRESS as string;
-  const MINT_AMOUNT = ethers.utils.parseUnits("100000000", 18); // ミントするトークン量（例: 100,000,000）
+  const MINT_AMOUNT = ethers.utils.parseUnits("10000000", 18); // ミントするトークン量（例: 100,000,000）
 
   const cJpy = await ethers.getContractAt("CJPY", CJPY_ADDRESS);
 
