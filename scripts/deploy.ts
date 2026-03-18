@@ -24,6 +24,16 @@ const contractConfigs: ContractConfig[] = [
     args: [process.env.REGISTRY_ADDRESS as string],
   },
   {
+    name: 'JOIN',
+    ownable: false,
+    args: [process.env.REGISTRY_ADDRESS as string],
+  },
+  {
+    name: 'ICHIGO',
+    ownable: false,
+    args: [process.env.REGISTRY_ADDRESS as string],
+  },
+  {
     name: 'Faucet',
     ownable: true,
     args: [process.env.REGISTRY_ADDRESS as string, process.env.FUND_ADDRESS as string],
