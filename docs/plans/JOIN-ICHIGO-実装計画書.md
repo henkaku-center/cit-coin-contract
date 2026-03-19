@@ -87,7 +87,8 @@ cJPY.sol
 
 - JOIN と ICHIGO は**新しい Registry 1つを共有**する
 - 既存prod環境の Registry（`0x9021e4Ed95Ea2157595C261c3DA318b75a6Dc156`）とは分離
-  - 理由: 別年度の受講生を管理するため
+  - 理由: 今回の対象は新年度の受講生であり、過去の受講生とは別管理とする
+  - **注意**: 過去の受講者は新しい Registry には含まれない。過去の受講者がトークンを利用する必要がある場合は、別途ホワイトリストへの追加が必要
 - Registry に minta, spark を `DEFAULT_ADMIN_ROLE` として登録
 
 ### 2-4. コントラクト依存関係
@@ -96,10 +97,13 @@ cJPY.sol
 Registry (依存なし)
   ├── JOIN (Registry に依存)
   ├── ICHIGO (Registry に依存)
-  ├── LearnToEarn (Registry, JOIN に依存) ※必要に応じて
+  ├── LearnToEarn (Registry, JOIN に依存) ※今回は不要: クイズ機能は使用しない
   ├── Faucet (Registry に依存) ※必要に応じて
   └── CitNFT (Registry, JOIN に依存) ※NFTミントサイト用
 ```
+
+> **補足**: LearnToEarn（クイズ機能）は今回のスコープでは使用しないため、デプロイ不要。
+> 学生のホワイトリスト管理は Registry への直接操作で対応する。
 
 ---
 
