@@ -8,6 +8,10 @@ import '@openzeppelin/contracts/access/AccessControl.sol';
 
 import './Whitelistable.sol';
 
+/**
+ * @dev JOIN is a copy of cJPY (ERC20 + ERC20Burnable + AccessControl + Whitelistable).
+ * ABI is identical to cJPY — frontend can reuse the cJPY ABI for this contract.
+ */
 contract JOIN is ERC20, ERC20Burnable, AccessControl, Whitelistable {
   bytes32 public constant MINTER_ROLE = keccak256('MINTER_ROLE');
   bytes32 public constant BURNER_ROLE = keccak256('BURNER_ROLE');
