@@ -145,3 +145,6 @@ contracts/**.flat.sol
 .vscode/
 .idea/
 .fleet/
+
+# macOS
+.DS_Store
